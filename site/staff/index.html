@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>CBSystem - Employee Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0d0d0f;--card:#17171b;--line:#2a2a31;--text:#ececf0;--muted:#8d8d99;--accent:#ff7a1a;--ok:#3ecf8e;--warn:#f5b942;--bad:#ff5d5d}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 'DM Sans',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+  h1{font:400 30px 'Bebas Neue',sans-serif;letter-spacing:1px;margin:0}
+  h1 span{color:var(--accent)}
+  h2{font:400 22px 'Bebas Neue',sans-serif;letter-spacing:.8px;margin:0 0 14px;color:var(--accent)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+  label{display:block;font-size:12px;color:var(--muted);margin:0 0 4px;text-transform:uppercase;letter-spacing:.6px}
+  input,select{width:100%;background:#0f0f12;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:inherit}
+  input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+  .field{margin-bottom:14px}
+  .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:14px}
+  button{background:var(--accent);color:#111;border:0;border-radius:8px;padding:10px 16px;font:700 14px 'DM Sans',sans-serif;cursor:pointer}
+  button:hover{filter:brightness(1.1)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  button.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  button.ghost:hover{border-color:var(--accent)}
+  button.small{padding:6px 10px;font-size:12px}
+  .hidden{display:none!important}
+  .muted{color:var(--muted)}
+
+  /* sign-in */
+  #login{margin:auto;width:100%;max-width:400px;padding:20px}
+  #login h1{text-align:center;margin-bottom:18px;font-size:32px;line-height:1.05}
+  #login button{width:100%}
+
+  /* app shell */
+  #app{display:flex;flex-direction:column;flex:1}
+  .top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 22px;border-bottom:1px solid var(--line)}
+  .top .who{margin-left:auto;text-align:right;font-size:13px}
+  .top .who b{display:block;font-size:15px}
+  nav{display:flex;gap:6px;padding:10px 22px;border-bottom:1px solid var(--line);overflow-x:auto}
+  nav button{background:transparent;color:var(--muted);border:1px solid transparent}
+  nav button.on{color:var(--text);border-color:var(--accent)}
+  main{width:100%;max-width:1100px;margin:0 auto;padding:22px;display:grid;gap:18px;flex:1;align-content:start}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:500}
+  .badge{padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700;background:#222229;color:var(--muted)}
+  .badge.owner,.badge.hr{background:#3a2412;color:var(--accent)}
+  .badge.manager{background:#122a3a;color:#5bb8ff}
+  footer{text-align:right;padding:14px 22px;color:var(--accent);font:400 18px 'Bebas Neue',sans-serif;letter-spacing:1px}
+
+  #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2a1414;border:1px solid var(--bad);color:#ffd5d5;padding:10px 16px;border-radius:8px;max-width:90vw;z-index:20}
+  #toast.good{background:#10281c;border-color:var(--ok);color:#c9f5df}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+  .modal .box{background:var(--card);border:1px solid var(--accent);border-radius:12px;padding:22px;width:100%;max-width:460px}
+  .pin{font:700 34px ui-monospace,Menlo,monospace;letter-spacing:6px;text-align:center;margin:14px 0;color:var(--accent)}
+  .warn{color:var(--warn);font-size:13px;margin:0 0 6px}
+  .btns{display:flex;gap:10px;margin-top:14px;justify-content:flex-end}
+  textarea{width:100%;background:#0f0f12;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:inherit;min-height:80px;margin:10px 0}
+  textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
+  button.danger{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+  h3{font:700 14px 'DM Sans',sans-serif;margin:16px 0 6px;color:var(--text)}
+  .rowcard{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;flex-wrap:wrap}
+  .rowcard.unread{border-color:var(--accent)}
+  .grow{flex:1;min-width:180px}
+  .strong{font-weight:700}
+  .small{font-size:12px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+  .chip{background:#222229;border-radius:99px;padding:3px 10px;font-size:13px}
+  .chip.skip{opacity:.55;text-decoration:line-through}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .stat{background:#0f0f12;border:1px solid var(--line);border-radius:12px;padding:16px}
+  .stat .big{font:400 48px 'Bebas Neue',sans-serif;color:var(--accent);line-height:1}
+  .stat .sub{color:var(--muted);font-size:13px}
+  .badge.st-pending,.badge.st-cancellation_pending{background:#3a2f12;color:var(--warn)}
+  .badge.st-approved,.badge.st-completed{background:#12301f;color:var(--ok)}
+  .badge.st-rejected{background:#3a1616;color:var(--bad)}
+  .badge.st-cancelled,.badge.st-draft{background:#222229;color:var(--muted)}
+  .problem{color:var(--bad);margin:6px 0}
+  .warnmsg{color:var(--warn);margin:6px 0}
+  .okmsg{color:var(--ok);margin:6px 0}
+  .preview{margin:14px 0;padding:14px;border:1px dashed var(--line);border-radius:10px;min-height:56px}
+  .checks label{display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:14px;color:var(--text);margin:6px 0}
+  .checks input{width:auto}
+  .cal{border-collapse:separate;border-spacing:2px;font-size:12px}
+  .cal th{font-weight:500;color:var(--muted);min-width:24px;text-align:center;padding:2px 0}
+  .cal td{height:22px;min-width:24px;background:#131317;border-radius:3px}
+  .cal td.name{background:none;white-space:nowrap;padding-right:12px;text-align:left;font-size:13px}
+  .cal .we{background:#1c1c22}.cal th.we,.cal th.bh{color:var(--text)}
+  .cal .bh{background:#2b2113}
+  .cal td.cal-approved{background:var(--ok)}
+  .cal td.cal-pending{background:var(--warn)}
+  .cal td.cal-half{background-image:linear-gradient(135deg,transparent 50%,#0d0d0f 50%)}
+  .cal td.cal-sick{background:#7d7d8c}
+</style>
+</head>
+<body>
+
+<!-- Sign-in -->
+<section id="login">
+  <h1>CBSystem <span>Employee Management</span></h1>
+  <p class="muted" style="text-align:center;margin:-8px 0 14px">Staff login</p>
+  <form class="card" id="loginForm" autocomplete="off">
+    <div class="field" id="slugField"><label for="slug">Business link name</label><input id="slug" autocapitalize="none" spellcheck="false"></div>
+    <p class="muted hidden" id="bizLabel" style="margin:0 0 14px"></p>
+    <div class="field"><label for="staffKey">Staff key</label><input id="staffKey" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX"></div>
+    <div class="field"><label for="empNo">Employee number</label><input id="empNo" autocapitalize="characters" spellcheck="false"></div>
+    <div class="field"><label for="pin">PIN</label><input id="pin" type="password" inputmode="numeric" autocomplete="off"></div>
+    <button type="submit" id="loginBtn">Sign in</button>
+  </form>
+  <p class="muted" style="text-align:center;margin-top:14px"><a id="otherLink" href="../business/" style="color:var(--accent)">Business owner or HR? Business login</a></p>
+</section>
+
+<!-- App shell -->
+<div id="app" class="hidden">
+  <div class="top">
+    <h1>CBSystem <span>Employee Management</span></h1>
+    <span class="muted" id="bizName"></span>
+    <div class="who"><b id="whoName"></b><span class="muted" id="whoRole"></span></div>
+    <button class="ghost small" id="logoutBtn">Sign out</button>
+  </div>
+  <nav id="nav"></nav>
+  <main id="view"></main>
+  <footer>CBSystem</footer>
+</div>
+
+<div id="toast" class="hidden" role="status"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---- configuration -------------------------------------------------
+  var FUNCTION_URL = 'https://wpfqxxnqksbkyzmcipft.supabase.co/functions/v1/cbs-hol';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var PORTAL = 'staff';
+  var S = { token: null, employee: null, business: null, slug: '' };
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined && text !== null) e.textContent = text;
+    return e;
+  }
+
+  function toast(msg, good) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.className = good ? 'good' : '';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { t.className = 'hidden'; }, 4500);
+  }
+
+  // ---- API -----------------------------------------------------------
+  function api(action, payload) {
+    var headers = { 'Content-Type': 'application/json' };
+    if (S.token) headers['x-session'] = S.token;
+    return fetch(FUNCTION_URL, {
+      method: 'POST', headers: headers,
+      body: JSON.stringify(Object.assign({ action: action }, payload || {}))
+    }).then(function (r) {
+      return r.json().catch(function () { throw new Error('Unexpected reply from server'); });
+    }).then(function (j) {
+      if (!j.ok) {
+        var code = j.error && j.error.code;
+        if (code === 'SESSION_EXPIRED' || code === 'NO_SESSION') { endSession('Your session has expired. Please sign in again.'); }
+        var err = new Error((j.error && j.error.message) || 'Request failed');
+        err.code = code;
+        throw err;
+      }
+      return j.data;
+    }, function (e) {
+      if (e && e.message === 'Failed to fetch') throw new Error('Cannot reach the server. Check your connection.');
+      throw e;
+    });
+  }
+
+  // ---- session -------------------------------------------------------
+  function saveSession(d) {
+    S.token = d.token; S.employee = d.employee; S.business = d.business;
+    sessionStorage.setItem('hol_session', JSON.stringify({ token: d.token, exp: d.expires_at, employee: d.employee, business: d.business }));
+  }
+
+  function endSession(msg) {
+    clearInterval(S.timer);
+    S.token = null; S.employee = null; S.business = null;
+    sessionStorage.removeItem('hol_session');
+    $('app').classList.add('hidden');
+    $('login').classList.remove('hidden');
+    $('pin').value = '';
+    if (msg) toast(msg);
+  }
+
+  // ---- sign-in -------------------------------------------------------
+  var qs = new URLSearchParams(location.search);
+  S.slug = (qs.get('b') || '').trim();
+  if (S.slug) {
+    $('slugField').classList.add('hidden');
+    $('slug').value = S.slug;
+    $('bizLabel').textContent = 'Signing in to: ' + S.slug;
+    $('bizLabel').classList.remove('hidden');
+    $('otherLink').href = '../business/?b=' + encodeURIComponent(S.slug);
+  }
+
+  $('loginForm').onsubmit = function (ev) {
+    ev.preventDefault();
+    var slug = ($('slug').value || S.slug).trim();
+    if (!slug) { toast('Enter the business link name'); return; }
+    var btn = $('loginBtn'); btn.disabled = true;
+    api('staff.login', {
+      slug: slug, staff_key: $('staffKey').value,
+      employee_number: $('empNo').value, pin: $('pin').value
+    }).then(function (d) {
+      $('pin').value = ''; $('staffKey').value = '';
+      saveSession(d);
+      showApp();
+    }).catch(function (e) { toast(e.message); $('pin').value = ''; })
+      .then(function () { btn.disabled = false; });
+  };
+
+  $('logoutBtn').onclick = function () {
+    api('staff.logout').catch(function () {}).then(function () { endSession(); });
+  };
+
+  // ---- shell ---------------------------------------------------------
+  var ROLE_LABEL = { employee: 'Employee', manager: 'Manager', hr: 'HR', owner: 'Owner' };
+  var screens = {};
+
+  function showApp() {
+    $('login').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    $('bizName').textContent = S.business.name;
+    $('whoName').textContent = S.employee.full_name;
+    $('whoRole').textContent = ROLE_LABEL[S.employee.role] || S.employee.role;
+
+    var tabs = [['home', 'Home'], ['request', 'Request leave'], ['requests', 'My requests'], ['calendar', 'Team calendar']];
+    if (S.employee.role === 'manager' || S.employee.role === 'hr') tabs.push(['approvals', 'Approvals']);
+    tabs.push(['notifications', 'Notifications'], ['account', 'My PIN']);
+    var nav = $('nav'); nav.textContent = '';
+    tabs.forEach(function (t) {
+      var b = el('button', '', t[1]);
+      b.dataset.tab = t[0];
+      b.onclick = function () { go(t[0]); };
+      nav.appendChild(b);
+    });
+    nav.classList.toggle('hidden', tabs.length < 2);
+    go('home');
+    clearInterval(S.timer);
+    S.timer = setInterval(refreshBadge, 60000);
+    refreshBadge();
+  }
+
+  function go(tab) {
+    Array.prototype.forEach.call($('nav').children, function (b) { b.classList.toggle('on', b.dataset.tab === tab); });
+    var v = $('view'); v.textContent = '';
+    screens[tab](v);
+  }
+
+  // ---- screens ------------------------------------------------------
+  // ---- shared helpers and screens (staff and business pages) ---------------
+  // today's date in the business's own time zone (not the browser's or UTC)
+  const todayStr = () => {
+    try {
+      return new Intl.DateTimeFormat('en-CA', { timeZone: (S.business && S.business.timezone) || 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+    } catch (e) { return new Date().toISOString().slice(0, 10); }
+  };
+  const fmtDate = (s) => { if (!s) return ''; const p = s.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; };
+  const fmtNum = (n) => String(Math.round(Number(n) * 100) / 100);
+  const fmtUnits = (n, unit) => fmtNum(n) + ' ' + (unit === 'hours' ? 'hour' : 'day') + (Number(n) === 1 ? '' : 's');
+  function rangeText(r) {
+    if (r.start_date === r.end_date) {
+      return fmtDate(r.start_date) + (r.start_half ? (r.start_half === 'am' ? ' (morning)' : ' (afternoon)') : '');
+    }
+    return fmtDate(r.start_date) + (r.start_half === 'pm' ? ' (from the afternoon)' : '') +
+      ' to ' + fmtDate(r.end_date) + (r.end_half === 'am' ? ' (until lunchtime)' : '');
+  }
+  const STATUS_LABEL = { pending: 'Pending', approved: 'Approved', rejected: 'Rejected', cancelled: 'Cancelled',
+    cancellation_pending: 'Cancellation requested', draft: 'Changes requested', completed: 'Completed' };
+  const statusBadge = (s) => el('span', 'badge st-' + s, STATUS_LABEL[s] || s);
+  const mkField = (label, input) => { const d = el('div'); d.appendChild(el('label', '', label)); d.appendChild(input); return d; };
+  const mkInput = (type, opts) => { const i = el('input'); i.type = type; Object.assign(i, opts || {}); return i; };
+  function btn(label, cls, fn) { const b = el('button', cls || '', label); b.type = 'button'; b.onclick = fn; return b; }
+  function card(title) { const c = el('section', 'card'); if (title) c.appendChild(el('h2', '', title)); return c; }
+  const fail = (e) => toast(e.message);
+
+  function refreshBadge() {
+    return api('notifications.list', { unread_only: true, limit: 1 }).then((d) => {
+      const b = document.querySelector('#nav button[data-tab="notifications"]');
+      if (b) b.textContent = 'Notifications' + (d.unread_count ? ' (' + d.unread_count + ')' : '');
+    }).catch(() => {});
+  }
+
+  // ---- team calendar ---------------------------------------------------
+  screens.calendar = function (v) {
+    const c = card('Team calendar');
+    v.appendChild(c);
+    const now = new Date();
+    let month = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const bar = el('div', 'btns');
+    bar.style.cssText = 'justify-content:space-between;align-items:center;margin:0 0 12px';
+    const title = el('strong');
+    const step = (n) => { month = new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + n, 1)); load(); };
+    bar.append(btn('Previous', 'ghost small', () => step(-1)), title, btn('Next', 'ghost small', () => step(1)));
+    const wrap = el('div');
+    wrap.style.overflowX = 'auto';
+    const legend = el('p', 'muted small');
+    legend.textContent = 'Green: away or approved leave. Amber: waiting for approval (only you and the manager see these). Grey: absent (only you, the manager and HR see this). Half-coloured: part day. Shaded columns: weekends and bank holidays.';
+    c.append(bar, wrap, legend);
+    const pad = (n) => String(n).padStart(2, '0');
+    function load() {
+      const y = month.getUTCFullYear(), m = month.getUTCMonth();
+      const lastDay = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+      title.textContent = month.toLocaleString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+      api('calendar.team', { from: y + '-' + pad(m + 1) + '-01', to: y + '-' + pad(m + 1) + '-' + pad(lastDay) }).then((d) => {
+        const hol = new Set(d.holidays);
+        const kind = (iso) => { const wd = new Date(iso + 'T00:00:00Z').getUTCDay(); return hol.has(iso) ? 'bh' : (wd === 0 || wd === 6 ? 'we' : ''); };
+        const t = el('table', 'cal');
+        const head = el('tr'); head.appendChild(el('th', '', ''));
+        d.days.forEach((iso) => {
+          const th = el('th', kind(iso), String(Number(iso.slice(8))));
+          th.title = fmtDate(iso) + (hol.has(iso) ? ' - bank holiday' : '');
+          head.appendChild(th);
+        });
+        t.appendChild(head);
+        d.people.forEach((p) => {
+          const tr = el('tr');
+          tr.appendChild(el('td', 'name', p.full_name + (p.is_me ? ' (you)' : '')));
+          const byDate = {}; p.cells.forEach((x) => { byDate[x.date] = x; });
+          d.days.forEach((iso) => {
+            const x = byDate[iso];
+            const td = el('td', kind(iso) + (x ? ' cal-' + x.status + (x.half ? ' cal-half' : '') : ''));
+            if (x) td.title = (x.status === 'approved' ? 'Away' : 'Waiting for approval') + (x.half ? ' (part day)' : '') + ' - ' + fmtDate(iso);
+            tr.appendChild(td);
+          });
+          t.appendChild(tr);
+        });
+        wrap.textContent = '';
+        if (!d.people.length) wrap.appendChild(el('p', 'muted', 'No one to show yet.'));
+        else wrap.appendChild(t);
+      }).catch(fail);
+    }
+    load();
+  };
+
+  // ---- approvals -------------------------------------------------------
+  screens.approvals = function (v) {
+    const inboxCard = card('Waiting for your decision');
+    const list = el('div');
+    inboxCard.appendChild(list);
+    const detailCard = card();
+    detailCard.classList.add('hidden');
+    const delegCard = card('Cover while you are away');
+    v.appendChild(inboxCard); v.appendChild(detailCard); v.appendChild(delegCard);
+
+    function renderInbox(items) {
+      list.textContent = '';
+      if (!items.length) { list.appendChild(el('p', 'muted', 'Nothing is waiting for you.')); return; }
+      items.forEach((it) => {
+        const row = el('div', 'rowcard');
+        const main = el('div', 'grow');
+        main.appendChild(el('div', 'strong', it.employee + ' (' + it.employee_number + ')'));
+        main.appendChild(el('div', 'muted', it.leave_type + ' - ' + rangeText(it) + ' - ' + fmtUnits(it.requested_units, it.unit)));
+        if (it.comment) main.appendChild(el('div', 'muted', '"' + it.comment + '"'));
+        row.appendChild(main);
+        row.appendChild(el('span', 'badge ' + (it.kind === 'cancellation' ? 'st-cancellation_pending' : 'st-pending'), it.kind === 'cancellation' ? 'Cancellation' : 'Request'));
+        row.appendChild(btn('Review', 'small', () => openDetail(it.request_id)));
+        list.appendChild(row);
+      });
+    }
+    const loadInbox = () => api('approvals.inbox', PORTAL === 'business' ? { scope: 'all' } : {}).then((d) => renderInbox(d.items)).catch(fail);
+
+    function openDetail(id) {
+      api('approvals.detail', { request_id: id }).then((d) => {
+        detailCard.textContent = '';
+        detailCard.classList.remove('hidden');
+        const isCancel = d.request.status === 'cancellation_pending';
+        detailCard.appendChild(el('h2', '', (isCancel ? 'Cancellation: ' : '') + d.employee.full_name));
+        detailCard.appendChild(el('p', '', d.leave_type.name + ' - ' + rangeText(d.request) + ' - ' + fmtUnits(d.request.requested_units, d.leave_type.unit)));
+        if (d.request.comment) detailCard.appendChild(el('p', 'muted', 'Note from employee: ' + d.request.comment));
+        const chips = el('div', 'chips');
+        d.days.forEach((x) => chips.appendChild(el('span', 'chip', fmtDate(x.date) + (x.units !== 1 ? ' (' + fmtNum(x.units) + ')' : ''))));
+        detailCard.appendChild(chips);
+        d.balances.forEach((b) => detailCard.appendChild(el('p', 'muted',
+          'Balance ' + b.leave_year + ': ' + fmtNum(b.available) + ' available, ' + fmtNum(b.requested) + ' requested' +
+          (b.other_pending > 0 ? ', ' + fmtNum(b.other_pending) + ' awaiting approval on other requests' : ''))));
+        if (d.staffing && d.staffing.message) detailCard.appendChild(el('p', 'warnmsg', d.staffing.message));
+        detailCard.appendChild(el('h3', '', 'Also away on these dates'));
+        if (!d.team_overlaps.length) detailCard.appendChild(el('p', 'muted', 'Nobody else in the team.'));
+        d.team_overlaps.forEach((o) => detailCard.appendChild(el('p', 'muted', o.employee + ': ' + fmtDate(o.start_date) + ' to ' + fmtDate(o.end_date) + ' (' + o.status + ')')));
+        if (d.history.length) {
+          detailCard.appendChild(el('h3', '', 'History'));
+          d.history.forEach((h) => detailCard.appendChild(el('p', 'muted', h.by + ': ' + h.decision.replace('_', ' ') + (h.comment ? ' - ' + h.comment : ''))));
+        }
+        const comment = el('textarea');
+        comment.placeholder = 'Reason (needed to reject or ask for changes)';
+        comment.maxLength = 500;
+        detailCard.appendChild(comment);
+        const bar = el('div', 'btns');
+        const decide = (decision, override) => {
+          if (decision !== 'approved' && !comment.value.trim()) { toast('Please give a reason'); comment.focus(); return; }
+          api('approvals.decide', { request_id: id, decision: decision, comment: comment.value.trim() || undefined, expected_version: d.request.version, override_staffing: override ? true : undefined })
+            .then(() => { toast('Done', true); detailCard.classList.add('hidden'); detailCard.textContent = ''; loadInbox(); refreshBadge(); })
+            .catch((e) => {
+              if (e.code === 'STAFFING_LIMIT') { if (confirm(e.message + '\n\nApprove anyway?')) decide(decision, true); return; }
+              toast(e.message);
+              if (e.code === 'STALE') { detailCard.classList.add('hidden'); loadInbox(); }
+            });
+        };
+        bar.appendChild(btn('Close', 'ghost', () => detailCard.classList.add('hidden')));
+        if (!isCancel) bar.appendChild(btn('Ask for changes', 'ghost', () => decide('changes_requested')));
+        bar.appendChild(btn(isCancel ? 'Decline cancellation' : 'Reject', 'danger', () => decide('rejected')));
+        bar.appendChild(btn(isCancel ? 'Approve cancellation' : 'Approve', '', () => decide('approved')));
+        detailCard.appendChild(bar);
+        if (detailCard.scrollIntoView) detailCard.scrollIntoView({ behavior: 'smooth' });
+      }).catch(fail);
+    }
+
+    // cover while away
+    delegCard.appendChild(el('p', 'muted', 'Choose someone to decide your requests while you are away.'));
+    const dForm = el('form');
+    const to = mkInput('text', { placeholder: 'Their employee number', maxLength: 20 });
+    const from = mkInput('date'); from.value = todayStr();
+    const until = mkInput('date');
+    const row = el('div', 'row');
+    row.append(mkField('Cover', to), mkField('From', from), mkField('Until', until));
+    const dBtn = el('button', '', 'Set cover'); dBtn.type = 'submit';
+    dForm.append(row, dBtn);
+    const dList = el('div');
+    delegCard.append(dForm, dList);
+    function loadDeleg() {
+      return api('approvals.delegations').then((d) => {
+        dList.textContent = '';
+        d.delegations.forEach((x) => {
+          const r = el('div', 'rowcard');
+          const m = el('div', 'grow');
+          m.appendChild(el('div', 'strong', x.direction === 'given' ? 'Your cover: ' + x.to : 'You cover for: ' + x.from));
+          m.appendChild(el('div', 'muted', fmtDate(x.starts_on) + ' to ' + fmtDate(x.ends_on)));
+          r.appendChild(m);
+          if (x.direction === 'given') r.appendChild(btn('Remove', 'ghost small', () => api('approvals.remove_delegation', { id: x.id }).then(loadDeleg).catch(fail)));
+          dList.appendChild(r);
+        });
+      }).catch(fail);
+    }
+    dForm.onsubmit = (ev) => {
+      ev.preventDefault();
+      if (!to.value.trim() || !from.value || !until.value) { toast('Enter who covers and the dates'); return; }
+      api('approvals.delegate', { to_employee_number: to.value, starts_on: from.value, ends_on: until.value })
+        .then(() => { toast('Cover set', true); to.value = ''; return loadDeleg(); }).catch(fail);
+    };
+    loadInbox();
+    loadDeleg();
+  };
+
+  // ---- notifications ---------------------------------------------------
+  screens.notifications = function (v) {
+    const c = card('Notifications');
+    v.appendChild(c);
+    const list = el('div');
+    function load() {
+      return api('notifications.list', { limit: 50 }).then((d) => {
+        list.textContent = '';
+        if (!d.notifications.length) list.appendChild(el('p', 'muted', 'No notifications yet.'));
+        d.notifications.forEach((n) => {
+          const r = el('div', 'rowcard' + (n.read_at ? '' : ' unread'));
+          const m = el('div', 'grow');
+          m.appendChild(el('div', 'strong', n.title));
+          if (n.body) m.appendChild(el('div', 'muted', n.body));
+          m.appendChild(el('div', 'muted small', new Date(n.created_at).toLocaleString('en-GB')));
+          r.appendChild(m);
+          list.appendChild(r);
+        });
+      }).catch(fail);
+    }
+    c.appendChild(btn('Mark all as read', 'ghost small', () => api('notifications.mark_read', { all: true }).then(() => { load(); refreshBadge(); }).catch(fail)));
+    c.appendChild(list);
+    load();
+  };
+
+  // ---- change my PIN ---------------------------------------------------
+  screens.account = function (v) {
+    const c = card('Change my PIN');
+    v.appendChild(c);
+    const f = el('form');
+    const cur = mkInput('password', { inputMode: 'numeric', maxLength: 6, autocomplete: 'off' });
+    const n1 = mkInput('password', { inputMode: 'numeric', maxLength: 6, autocomplete: 'off' });
+    const n2 = mkInput('password', { inputMode: 'numeric', maxLength: 6, autocomplete: 'off' });
+    const row = el('div', 'row');
+    row.append(mkField('Current PIN', cur), mkField('New PIN (6 digits)', n1), mkField('New PIN again', n2));
+    const saveBtn = el('button', '', 'Change PIN'); saveBtn.type = 'submit';
+    f.append(row, saveBtn);
+    f.onsubmit = (ev) => {
+      ev.preventDefault();
+      if (n1.value !== n2.value) { toast('The new PINs do not match'); return; }
+      api('staff.change_pin', { current_pin: cur.value, new_pin: n1.value })
+        .then(() => { toast('PIN changed. Your other sessions were signed out.', true); cur.value = ''; n1.value = ''; n2.value = ''; })
+        .catch(fail);
+    };
+    c.appendChild(f);
+  };
+
+  // ---- staff: absence (sickness) ------------------------------------------
+  function drawSickness(v) {
+    const c = card('Absence');
+    v.appendChild(c);
+    c.appendChild(el('p', 'muted', 'If you are unwell and cannot work, tell your manager here. Your manager and HR can see the dates. The reason stays private.'));
+    const actions = el('div', 'btns'); actions.style.justifyContent = 'flex-start';
+    const out = el('div');
+    c.append(actions, out);
+    function load() {
+      api('sickness.list', { limit: 10 }).then((d) => {
+        const mine = d.rows.filter((r) => r.own);
+        const open = mine.find((r) => !r.ends_on);
+        actions.textContent = '';
+        if (open) actions.appendChild(btn('I am back at work', '', () => api('sickness.close', { id: open.id }).then(() => { toast('Welcome back', true); load(); }).catch(fail)));
+        else actions.appendChild(btn('I am off sick today', 'ghost', () => {
+          if (!confirm('Tell your manager you are off sick today?')) return;
+          api('sickness.report', {}).then(() => { toast('Your manager has been told', true); load(); }).catch(fail);
+        }));
+        out.textContent = '';
+        mine.forEach((r) => out.appendChild(el('div', 'rowcard', fmtDate(r.starts_on) + (r.ends_on ? ' to ' + fmtDate(r.ends_on) : ' - ongoing'))));
+      }).catch(fail);
+    }
+    load();
+  }
+
+  // ---- staff: dashboard ------------------------------------------------
+  screens.home = function (v) {
+    const hello = card('Hello, ' + S.employee.full_name.split(' ')[0]);
+    v.appendChild(hello);
+    hello.appendChild(el('p', 'muted', 'This is where your leave stands.'));
+    const stats = el('div', 'stats');
+    hello.appendChild(stats);
+    const upCard = card('Coming up');
+    const upList = el('div');
+    upCard.appendChild(upList);
+    v.appendChild(upCard);
+    hello.appendChild(btn('Request leave', '', () => go('request')));
+    drawSickness(v);
+
+    Promise.all([api('leave.balances'), api('leave.my_requests', { limit: 100 })]).then((res) => {
+      const t = todayStr();
+      let rows = res[0].balances.filter((x) => x.starts_on <= t && t <= x.ends_on);
+      if (!rows.length) rows = res[0].balances;
+      if (!rows.length) stats.appendChild(el('p', 'muted', 'No leave has been allocated to you yet. Please ask HR.'));
+      rows.forEach((x) => {
+        const s = el('div', 'stat');
+        s.appendChild(el('div', 'muted', x.leave_type + ' ' + x.leave_year));
+        s.appendChild(el('div', 'big', fmtNum(x.available_after_pending)));
+        s.appendChild(el('div', 'sub', (x.unit === 'hours' ? 'hours' : 'days') + ' left to book'));
+        s.appendChild(el('div', 'sub', 'Entitlement ' + fmtNum(x.entitlement) + ' | Booked ' + fmtNum(x.booked) +
+          ' | Taken ' + fmtNum(x.taken) + ' | Awaiting approval ' + fmtNum(x.pending)));
+        stats.appendChild(s);
+      });
+      const up = res[1].requests
+        .filter((q) => ['approved', 'pending', 'cancellation_pending'].includes(q.status) && q.end_date >= t)
+        .sort((a, z) => a.start_date.localeCompare(z.start_date));
+      if (!up.length) upList.appendChild(el('p', 'muted', 'No upcoming leave.'));
+      up.forEach((q) => {
+        const r = el('div', 'rowcard');
+        const m = el('div', 'grow');
+        m.appendChild(el('div', 'strong', rangeText(q)));
+        m.appendChild(el('div', 'muted', q.leave_type + ' - ' + fmtUnits(q.requested_units, q.unit)));
+        r.appendChild(m);
+        r.appendChild(statusBadge(q.status));
+        upList.appendChild(r);
+      });
+    }).catch(fail);
+  };
+
+  // ---- staff: request leave with live preview ----------------------------
+  screens.request = function (v) {
+    const editing = S.edit || null;
+    S.edit = null;
+    const c = card(editing ? 'Change your request' : 'Request leave');
+    v.appendChild(c);
+    const typeSel = el('select');
+    const start = mkInput('date');
+    const end = mkInput('date');
+    const lenSel = el('select');
+    [['full', 'Full day'], ['am', 'Half day - morning'], ['pm', 'Half day - afternoon'], ['hours', 'Part of a day (hours)']].forEach((o) => {
+      const op = el('option', '', o[1]); op.value = o[0]; lenSel.appendChild(op);
+    });
+    const hours = mkInput('number', { min: '0.25', step: '0.25', placeholder: 'Hours' });
+    const startPm = mkInput('checkbox');
+    const endAm = mkInput('checkbox');
+
+    const r1 = el('div', 'row');
+    r1.append(mkField('Type of leave', typeSel), mkField('From', start), mkField('To', end));
+    c.appendChild(r1);
+
+    const singleBox = el('div', 'row');
+    singleBox.append(mkField('Length', lenSel));
+    const hoursField = mkField('Hours', hours);
+    singleBox.appendChild(hoursField);
+    const multiBox = el('div', 'checks');
+    const l1 = el('label'); l1.append(startPm, document.createTextNode('First day: start after lunch (afternoon only)'));
+    const l2 = el('label'); l2.append(endAm, document.createTextNode('Last day: finish at lunchtime (morning only)'));
+    multiBox.append(l1, l2);
+    c.append(singleBox, multiBox);
+
+    const out = el('div', 'preview');
+    out.appendChild(el('p', 'muted', 'Choose your dates to see what this will use.'));
+    const comment = el('textarea');
+    comment.placeholder = 'Note for your manager (optional)';
+    comment.maxLength = 500;
+    const submit = btn('Send request', '', () => doSubmit());
+    submit.disabled = true;
+    c.append(out, comment, submit);
+
+    function isSingle() { return !!start.value && start.value === end.value; }
+    function sync() {
+      const single = isSingle();
+      singleBox.classList.toggle('hidden', !single);
+      multiBox.classList.toggle('hidden', single || !start.value || !end.value);
+      hoursField.classList.toggle('hidden', !(single && lenSel.value === 'hours'));
+    }
+    function payload() {
+      const p = { leave_type_id: typeSel.value, start_date: start.value, end_date: end.value };
+      if (editing) p.replaces_request_id = editing.id;
+      if (isSingle()) {
+        if (lenSel.value === 'am' || lenSel.value === 'pm') p.start_half = lenSel.value;
+        if (lenSel.value === 'hours') p.hours = Number(hours.value);
+      } else {
+        if (startPm.checked) p.start_half = 'pm';
+        if (endAm.checked) p.end_half = 'am';
+      }
+      return p;
+    }
+
+    let seq = 0, timer = null;
+    function runPreview() {
+      sync();
+      submit.disabled = true;
+      const mine = ++seq;
+      if (!start.value || !end.value || !typeSel.value) return;
+      if (isSingle() && lenSel.value === 'hours' && !(Number(hours.value) > 0)) return;
+      out.textContent = '';
+      out.appendChild(el('p', 'muted', 'Checking...'));
+      api('leave.preview', payload()).then((d) => {
+        if (mine !== seq) return;
+        out.textContent = '';
+        out.appendChild(el('div', 'strong', fmtUnits(d.requested_units, d.leave_type.unit) + ' will be used' + (d.requires_approval ? ' once approved' : '')));
+        const chips = el('div', 'chips');
+        d.charged_days.forEach((x) => chips.appendChild(el('span', 'chip', fmtDate(x.date) + (x.units !== 1 ? ' (' + fmtNum(x.units) + ')' : ''))));
+        d.skipped_days.filter((x) => x.reason === 'bank_holiday').forEach((x) => chips.appendChild(el('span', 'chip skip', fmtDate(x.date) + ' bank holiday')));
+        out.appendChild(chips);
+        const nonWork = d.skipped_days.filter((x) => x.reason === 'non_working_day').length;
+        if (nonWork) out.appendChild(el('p', 'muted small', nonWork + ' non-working day' + (nonWork === 1 ? '' : 's') + ' not counted.'));
+        d.balances.forEach((b) => out.appendChild(el('p', b.remaining < 0 ? 'problem' : 'muted',
+          'Left after this request (' + b.leave_year + '): ' + fmtNum(b.remaining))));
+        d.warnings.forEach((w) => out.appendChild(el('p', 'warnmsg', w)));
+        d.problems.forEach((p) => out.appendChild(el('p', 'problem', p)));
+        submit.disabled = !d.can_submit;
+      }).catch((e) => {
+        if (mine !== seq) return;
+        out.textContent = '';
+        out.appendChild(el('p', 'problem', e.message));
+      });
+    }
+    const schedule = () => { clearTimeout(timer); timer = setTimeout(runPreview, 350); };
+    start.onchange = () => { if (!end.value || end.value < start.value) end.value = start.value; schedule(); sync(); };
+    [end, lenSel, hours, typeSel, startPm, endAm].forEach((x) => { x.onchange = schedule; });
+    hours.oninput = schedule;
+
+    function doSubmit() {
+      submit.disabled = true;
+      api('leave.submit', Object.assign(payload(), { comment: comment.value.trim() || undefined }))
+        .then((d) => { toast(d.status === 'approved' ? 'Leave booked' : 'Request sent to your approver', true); go('requests'); })
+        .catch((e) => { toast(e.message); runPreview(); });
+    }
+
+    api('leave.types').then((d) => {
+      d.leave_types.forEach((t) => { const o = el('option', '', t.name); o.value = t.id; o.dataset.code = t.code; typeSel.appendChild(o); });
+      const annual = d.leave_types.find((t) => t.code === 'annual');
+      if (annual) typeSel.value = annual.id;
+      if (editing) {
+        typeSel.value = editing.leave_type_id;
+        start.value = editing.start_date; end.value = editing.end_date;
+        if (editing.start_date === editing.end_date) lenSel.value = editing.start_half || 'full';
+        else { startPm.checked = editing.start_half === 'pm'; endAm.checked = editing.end_half === 'am'; }
+        comment.value = editing.comment || '';
+        runPreview();
+      }
+    }).catch(fail);
+    sync();
+  };
+
+  // ---- staff: my requests ----------------------------------------------
+  screens.requests = function (v) {
+    const c = card('My requests');
+    v.appendChild(c);
+    const list = el('div');
+    c.appendChild(list);
+    function load() {
+      return api('leave.my_requests', { limit: 100 }).then((d) => {
+        list.textContent = '';
+        if (!d.requests.length) list.appendChild(el('p', 'muted', 'You have not made any requests yet.'));
+        d.requests.forEach((q) => {
+          const r = el('div', 'rowcard');
+          const m = el('div', 'grow');
+          m.appendChild(el('div', 'strong', rangeText(q)));
+          m.appendChild(el('div', 'muted', q.leave_type + ' - ' + fmtUnits(q.requested_units, q.unit)));
+          if (q.comment) m.appendChild(el('div', 'muted', '"' + q.comment + '"'));
+          if (q.status === 'draft') m.appendChild(el('div', 'warnmsg', 'Your approver asked for changes (see Notifications). Withdraw this and send a new request.'));
+          r.appendChild(m);
+          r.appendChild(statusBadge(q.status));
+          if (q.status === 'pending' || q.status === 'draft') {
+            r.appendChild(btn('Change', 'ghost small', () => { S.edit = q; go('request'); }));
+            r.appendChild(btn('Withdraw', 'ghost small', () => {
+              if (!confirm('Withdraw this request?')) return;
+              api('leave.cancel', { request_id: q.id }).then(() => { toast('Request withdrawn', true); load(); }).catch(fail);
+            }));
+          } else if (q.status === 'approved' && q.end_date >= todayStr()) {
+            r.appendChild(btn('Ask to cancel', 'ghost small', () => {
+              const reason = prompt('Why do you want to cancel? (optional)');
+              if (reason === null) return;
+              api('leave.cancel', { request_id: q.id, reason: reason.trim() || undefined })
+                .then(() => { toast('Cancellation sent to your approver', true); load(); }).catch(fail);
+            }));
+          }
+          list.appendChild(r);
+        });
+      }).catch(fail);
+    }
+    load();
+  };
+
+  // ---- resume a session in the same tab -------------------------------
+  try {
+    var saved = JSON.parse(sessionStorage.getItem('hol_session') || 'null');
+    if (saved && new Date(saved.exp) > new Date()) {
+      S.token = saved.token; S.employee = saved.employee; S.business = saved.business;
+      api('staff.me').then(function (d) { S.employee = d.employee; S.business = d.business; showApp(); })
+        .catch(function () { endSession(); });
+    }
+  } catch (e) { sessionStorage.removeItem('hol_session'); }
+})();
+</script>
+</body>
+</html>
