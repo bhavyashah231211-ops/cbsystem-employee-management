@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>CBSystem - Employee Management - Business</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0d0d0f;--card:#17171b;--line:#2a2a31;--text:#ececf0;--muted:#8d8d99;--accent:#ff7a1a;--ok:#3ecf8e;--warn:#f5b942;--bad:#ff5d5d}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 'DM Sans',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+  h1{font:400 30px 'Bebas Neue',sans-serif;letter-spacing:1px;margin:0}
+  h1 span{color:var(--accent)}
+  h2{font:400 22px 'Bebas Neue',sans-serif;letter-spacing:.8px;margin:0 0 14px;color:var(--accent)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+  label{display:block;font-size:12px;color:var(--muted);margin:0 0 4px;text-transform:uppercase;letter-spacing:.6px}
+  input,select{width:100%;background:#0f0f12;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:inherit}
+  input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+  .field{margin-bottom:14px}
+  .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:14px}
+  button{background:var(--accent);color:#111;border:0;border-radius:8px;padding:10px 16px;font:700 14px 'DM Sans',sans-serif;cursor:pointer}
+  button:hover{filter:brightness(1.1)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  button.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  button.ghost:hover{border-color:var(--accent)}
+  button.small{padding:6px 10px;font-size:12px}
+  .hidden{display:none!important}
+  .muted{color:var(--muted)}
+
+  /* sign-in */
+  #login{margin:auto;width:100%;max-width:400px;padding:20px}
+  #login h1{text-align:center;margin-bottom:18px;font-size:32px;line-height:1.05}
+  #login button{width:100%}
+
+  /* app shell */
+  #app{display:flex;flex-direction:column;flex:1}
+  .top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 22px;border-bottom:1px solid var(--line)}
+  .top .who{margin-left:auto;text-align:right;font-size:13px}
+  .top .who b{display:block;font-size:15px}
+  nav{display:flex;gap:6px;padding:10px 22px;border-bottom:1px solid var(--line);overflow-x:auto}
+  nav button{background:transparent;color:var(--muted);border:1px solid transparent}
+  nav button.on{color:var(--text);border-color:var(--accent)}
+  main{width:100%;max-width:1100px;margin:0 auto;padding:22px;display:grid;gap:18px;flex:1;align-content:start}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:500}
+  .badge{padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700;background:#222229;color:var(--muted)}
+  .badge.owner,.badge.hr{background:#3a2412;color:var(--accent)}
+  .badge.manager{background:#122a3a;color:#5bb8ff}
+  footer{text-align:right;padding:14px 22px;color:var(--accent);font:400 18px 'Bebas Neue',sans-serif;letter-spacing:1px}
+
+  #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2a1414;border:1px solid var(--bad);color:#ffd5d5;padding:10px 16px;border-radius:8px;max-width:90vw;z-index:20}
+  #toast.good{background:#10281c;border-color:var(--ok);color:#c9f5df}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+  .modal .box{background:var(--card);border:1px solid var(--accent);border-radius:12px;padding:22px;width:100%;max-width:460px}
+  .pin{font:700 34px ui-monospace,Menlo,monospace;letter-spacing:6px;text-align:center;margin:14px 0;color:var(--accent)}
+  .warn{color:var(--warn);font-size:13px;margin:0 0 6px}
+  .btns{display:flex;gap:10px;margin-top:14px;justify-content:flex-end}
+  textarea{width:100%;background:#0f0f12;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:inherit;min-height:80px;margin:10px 0}
+  textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
+  button.danger{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+  h3{font:700 14px 'DM Sans',sans-serif;margin:16px 0 6px;color:var(--text)}
+  .rowcard{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;flex-wrap:wrap}
+  .rowcard.unread{border-color:var(--accent)}
+  .grow{flex:1;min-width:180px}
+  .strong{font-weight:700}
+  .small{font-size:12px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+  .chip{background:#222229;border-radius:99px;padding:3px 10px;font-size:13px}
+  .chip.skip{opacity:.55;text-decoration:line-through}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .stat{background:#0f0f12;border:1px solid var(--line);border-radius:12px;padding:16px}
+  .stat .big{font:400 48px 'Bebas Neue',sans-serif;color:var(--accent);line-height:1}
+  .stat .sub{color:var(--muted);font-size:13px}
+  .badge.st-pending,.badge.st-cancellation_pending{background:#3a2f12;color:var(--warn)}
+  .badge.st-approved,.badge.st-completed{background:#12301f;color:var(--ok)}
+  .badge.st-rejected{background:#3a1616;color:var(--bad)}
+  .badge.st-cancelled,.badge.st-draft{background:#222229;color:var(--muted)}
+  .problem{color:var(--bad);margin:6px 0}
+  .warnmsg{color:var(--warn);margin:6px 0}
+  .okmsg{color:var(--ok);margin:6px 0}
+  .preview{margin:14px 0;padding:14px;border:1px dashed var(--line);border-radius:10px;min-height:56px}
+  .checks label{display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:14px;color:var(--text);margin:6px 0}
+  .checks input{width:auto}
+  .cal{border-collapse:separate;border-spacing:2px;font-size:12px}
+  .cal th{font-weight:500;color:var(--muted);min-width:24px;text-align:center;padding:2px 0}
+  .cal td{height:22px;min-width:24px;background:#131317;border-radius:3px}
+  .cal td.name{background:none;white-space:nowrap;padding-right:12px;text-align:left;font-size:13px}
+  .cal .we{background:#1c1c22}.cal th.we,.cal th.bh{color:var(--text)}
+  .cal .bh{background:#2b2113}
+  .cal td.cal-approved{background:var(--ok)}
+  .cal td.cal-pending{background:var(--warn)}
+  .cal td.cal-half{background-image:linear-gradient(135deg,transparent 50%,#0d0d0f 50%)}
+  .cal td.cal-sick{background:#7d7d8c}
+</style>
+</head>
+<body>
+
+<!-- Sign-in -->
+<section id="login">
+  <h1>CBSystem <span>Employee Management</span></h1>
+  <p class="muted" style="text-align:center;margin:-8px 0 14px">Business login - owner and HR</p>
+  <form class="card" id="loginForm" autocomplete="off">
+    <div class="field" id="slugField"><label for="slug">Business link name</label><input id="slug" autocapitalize="none" spellcheck="false"></div>
+    <p class="muted hidden" id="bizLabel" style="margin:0 0 14px"></p>
+    <div class="field"><label for="empNo">Employee number</label><input id="empNo" autocapitalize="characters" spellcheck="false" placeholder="OWNER, or your HR number"></div>
+    <div class="field"><label for="pin">PIN</label><input id="pin" type="password" inputmode="numeric" autocomplete="off"></div>
+    <button type="submit" id="loginBtn">Sign in</button>
+  </form>
+  <p class="muted" style="text-align:center;margin-top:14px"><a id="otherLink" href="../staff/" style="color:var(--accent)">Employee? Go to the staff login</a></p>
+</section>
+
+<!-- App shell -->
+<div id="app" class="hidden">
+  <div class="top">
+    <h1>CBSystem <span>Employee Management</span></h1>
+    <span class="muted" id="bizName"></span><span class="badge owner">Business</span>
+    <div class="who"><b id="whoName"></b><span class="muted" id="whoRole"></span></div>
+    <button class="ghost small" id="logoutBtn">Sign out</button>
+  </div>
+  <nav id="nav"></nav>
+  <main id="view"></main>
+  <footer>CBSystem</footer>
+</div>
+
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="box">
+    <h2 id="modalTitle"></h2>
+    <p class="warn">Shown once. Give this PIN to the employee now.</p>
+    <div class="pin" id="modalPin"></div>
+    <p class="muted" id="modalNote" style="margin:0"></p>
+    <div class="btns"><button class="ghost" id="modalCopy">Copy</button><button id="modalClose">Done</button></div>
+  </div>
+</div>
+<div id="toast" class="hidden" role="status"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---- configuration -------------------------------------------------
+  var FUNCTION_URL = 'https://wviakiswsrkxhjkgmnbw.supabase.co/functions/v1/cbs-hol';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var PORTAL = 'business';
+  var S = { token: null, employee: null, business: null, slug: '' };
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined && text !== null) e.textContent = text;
+    return e;
+  }
+
+  function toast(msg, good) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.className = good ? 'good' : '';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { t.className = 'hidden'; }, 4500);
+  }
+
+  // ---- API -----------------------------------------------------------
+  function api(action, payload) {
+    var headers = { 'Content-Type': 'application/json' };
+    if (S.token) headers['x-session'] = S.token;
+    return fetch(FUNCTION_URL, {
+      method: 'POST', headers: headers,
+      body: JSON.stringify(Object.assign({ action: action }, payload || {}))
+    }).then(function (r) {
+      return r.json().catch(function () { throw new Error('Unexpected reply from server'); });
+    }).then(function (j) {
+      if (!j.ok) {
+        var code = j.error && j.error.code;
+        if (code === 'SESSION_EXPIRED' || code === 'NO_SESSION') { endSession('Your session has expired. Please sign in again.'); }
+        var err = new Error((j.error && j.error.message) || 'Request failed');
+        err.code = code;
+        throw err;
+      }
+      return j.data;
+    }, function (e) {
+      if (e && e.message === 'Failed to fetch') throw new Error('Cannot reach the server. Check your connection.');
+      throw e;
+    });
+  }
+
+  // ---- session -------------------------------------------------------
+  function saveSession(d) {
+    S.token = d.token; S.employee = d.employee; S.business = d.business;
+    sessionStorage.setItem('hol_biz_session', JSON.stringify({ token: d.token, exp: d.expires_at, employee: d.employee, business: d.business }));
+  }
+
+  function endSession(msg) {
+    clearInterval(S.timer);
+    S.token = null; S.employee = null; S.business = null;
+    sessionStorage.removeItem('hol_biz_session');
+    $('app').classList.add('hidden');
+    $('login').classList.remove('hidden');
+    $('pin').value = '';
+    if (msg) toast(msg);
+  }
+
+  // ---- sign-in -------------------------------------------------------
+  var qs = new URLSearchParams(location.search);
+  S.slug = (qs.get('b') || '').trim();
+  if (S.slug) {
+    $('slugField').classList.add('hidden');
+    $('slug').value = S.slug;
+    $('bizLabel').textContent = 'Signing in to: ' + S.slug;
+    $('bizLabel').classList.remove('hidden');
+    $('otherLink').href = '../staff/?b=' + encodeURIComponent(S.slug);
+  }
+
+  $('loginForm').onsubmit = function (ev) {
+    ev.preventDefault();
+    var slug = ($('slug').value || S.slug).trim();
+    if (!slug) { toast('Enter the business link name'); return; }
+    var btn = $('loginBtn'); btn.disabled = true;
+    api('business.login', {
+      slug: slug,
+      employee_number: $('empNo').value, pin: $('pin').value
+    }).then(function (d) {
+      $('pin').value = '';
+      saveSession(d);
+      showApp();
+    }).catch(function (e) { toast(e.message); $('pin').value = ''; })
+      .then(function () { btn.disabled = false; });
+  };
+
+  $('logoutBtn').onclick = function () {
+    api('staff.logout').catch(function () {}).then(function () { endSession(); });
+  };
+
+  // ---- shell ---------------------------------------------------------
+  var ROLE_LABEL = { employee: 'Employee', manager: 'Manager', hr: 'HR', owner: 'Owner' };
+  var screens = {};
+
+  function showApp() {
+    $('login').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    $('bizName').textContent = S.business.name;
+    $('whoName').textContent = S.employee.full_name;
+    $('whoRole').textContent = ROLE_LABEL[S.employee.role] || S.employee.role;
+
+    var tabs = [['home', 'Home'], ['setup', 'Setup'], ['people', 'People'], ['balances', 'Balances'], ['approvals', 'Approvals'], ['calendar', 'Calendar'], ['sickness', 'Sickness'], ['reports', 'Reports'], ['audit', 'Audit log'], ['notifications', 'Notifications'], ['account', 'My PIN']];
+    var nav = $('nav'); nav.textContent = '';
+    tabs.forEach(function (t) {
+      var b = el('button', '', t[1]);
+      b.dataset.tab = t[0];
+      b.onclick = function () { go(t[0]); };
+      nav.appendChild(b);
+    });
+    go('home');
+    clearInterval(S.timer);
+    S.timer = setInterval(refreshBadge, 60000);
+    refreshBadge();
+  }
+
+  function go(tab) {
+    Array.prototype.forEach.call($('nav').children, function (b) { b.classList.toggle('on', b.dataset.tab === tab); });
+    var v = $('view'); v.textContent = '';
+    screens[tab](v);
+  }
+
+  // ---- screens -------------------------------------------------------
+  // ---- shared helpers and screens (staff and business pages) ---------------
+  // today's date in the business's own time zone (not the browser's or UTC)
+  const todayStr = () => {
+    try {
+      return new Intl.DateTimeFormat('en-CA', { timeZone: (S.business && S.business.timezone) || 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+    } catch (e) { return new Date().toISOString().slice(0, 10); }
+  };
+  const fmtDate = (s) => { if (!s) return ''; const p = s.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; };
+  const fmtNum = (n) => String(Math.round(Number(n) * 100) / 100);
+  const fmtUnits = (n, unit) => fmtNum(n) + ' ' + (unit === 'hours' ? 'hour' : 'day') + (Number(n) === 1 ? '' : 's');
+  function rangeText(r) {
+    if (r.start_date === r.end_date) {
+      return fmtDate(r.start_date) + (r.start_half ? (r.start_half === 'am' ? ' (morning)' : ' (afternoon)') : '');
+    }
+    return fmtDate(r.start_date) + (r.start_half === 'pm' ? ' (from the afternoon)' : '') +
+      ' to ' + fmtDate(r.end_date) + (r.end_half === 'am' ? ' (until lunchtime)' : '');
+  }
+  const STATUS_LABEL = { pending: 'Pending', approved: 'Approved', rejected: 'Rejected', cancelled: 'Cancelled',
+    cancellation_pending: 'Cancellation requested', draft: 'Changes requested', completed: 'Completed' };
+  const statusBadge = (s) => el('span', 'badge st-' + s, STATUS_LABEL[s] || s);
+  const mkField = (label, input) => { const d = el('div'); d.appendChild(el('label', '', label)); d.appendChild(input); return d; };
+  const mkInput = (type, opts) => { const i = el('input'); i.type = type; Object.assign(i, opts || {}); return i; };
+  function btn(label, cls, fn) { const b = el('button', cls || '', label); b.type = 'button'; b.onclick = fn; return b; }
+  function card(title) { const c = el('section', 'card'); if (title) c.appendChild(el('h2', '', title)); return c; }
+  const fail = (e) => toast(e.message);
+
+  function refreshBadge() {
+    return api('notifications.list', { unread_only: true, limit: 1 }).then((d) => {
+      const b = document.querySelector('#nav button[data-tab="notifications"]');
+      if (b) b.textContent = 'Notifications' + (d.unread_count ? ' (' + d.unread_count + ')' : '');
+    }).catch(() => {});
+  }
+
+  // ---- team calendar ---------------------------------------------------
+  screens.calendar = function (v) {
+    const c = card('Team calendar');
+    v.appendChild(c);
+    const now = new Date();
+    let month = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const bar = el('div', 'btns');
+    bar.style.cssText = 'justify-content:space-between;align-items:center;margin:0 0 12px';
+    const title = el('strong');
+    const step = (n) => { month = new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + n, 1)); load(); };
+    bar.append(btn('Previous', 'ghost small', () => step(-1)), title, btn('Next', 'ghost small', () => step(1)));
+    const wrap = el('div');
+    wrap.style.overflowX = 'auto';
+    const legend = el('p', 'muted small');
+    legend.textContent = 'Green: away or approved leave. Amber: waiting for approval (only you and the manager see these). Grey: absent (only you, the manager and HR see this). Half-coloured: part day. Shaded columns: weekends and bank holidays.';
+    c.append(bar, wrap, legend);
+    const pad = (n) => String(n).padStart(2, '0');
+    function load() {
+      const y = month.getUTCFullYear(), m = month.getUTCMonth();
+      const lastDay = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+      title.textContent = month.toLocaleString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+      api('calendar.team', { from: y + '-' + pad(m + 1) + '-01', to: y + '-' + pad(m + 1) + '-' + pad(lastDay) }).then((d) => {
+        const hol = new Set(d.holidays);
+        const kind = (iso) => { const wd = new Date(iso + 'T00:00:00Z').getUTCDay(); return hol.has(iso) ? 'bh' : (wd === 0 || wd === 6 ? 'we' : ''); };
+        const t = el('table', 'cal');
+        const head = el('tr'); head.appendChild(el('th', '', ''));
+        d.days.forEach((iso) => {
+          const th = el('th', kind(iso), String(Number(iso.slice(8))));
+          th.title = fmtDate(iso) + (hol.has(iso) ? ' - bank holiday' : '');
+          head.appendChild(th);
+        });
+        t.appendChild(head);
+        d.people.forEach((p) => {
+          const tr = el('tr');
+          tr.appendChild(el('td', 'name', p.full_name + (p.is_me ? ' (you)' : '')));
+          const byDate = {}; p.cells.forEach((x) => { byDate[x.date] = x; });
+          d.days.forEach((iso) => {
+            const x = byDate[iso];
+            const td = el('td', kind(iso) + (x ? ' cal-' + x.status + (x.half ? ' cal-half' : '') : ''));
+            if (x) td.title = (x.status === 'approved' ? 'Away' : 'Waiting for approval') + (x.half ? ' (part day)' : '') + ' - ' + fmtDate(iso);
+            tr.appendChild(td);
+          });
+          t.appendChild(tr);
+        });
+        wrap.textContent = '';
+        if (!d.people.length) wrap.appendChild(el('p', 'muted', 'No one to show yet.'));
+        else wrap.appendChild(t);
+      }).catch(fail);
+    }
+    load();
+  };
+
+  // ---- approvals -------------------------------------------------------
+  screens.approvals = function (v) {
+    const inboxCard = card('Waiting for your decision');
+    const list = el('div');
+    inboxCard.appendChild(list);
+    const detailCard = card();
+    detailCard.classList.add('hidden');
+    const delegCard = card('Cover while you are away');
+    v.appendChild(inboxCard); v.appendChild(detailCard); v.appendChild(delegCard);
+
+    function renderInbox(items) {
+      list.textContent = '';
+      if (!items.length) { list.appendChild(el('p', 'muted', 'Nothing is waiting for you.')); return; }
+      items.forEach((it) => {
+        const row = el('div', 'rowcard');
+        const main = el('div', 'grow');
+        main.appendChild(el('div', 'strong', it.employee + ' (' + it.employee_number + ')'));
+        main.appendChild(el('div', 'muted', it.leave_type + ' - ' + rangeText(it) + ' - ' + fmtUnits(it.requested_units, it.unit)));
+        if (it.comment) main.appendChild(el('div', 'muted', '"' + it.comment + '"'));
+        row.appendChild(main);
+        row.appendChild(el('span', 'badge ' + (it.kind === 'cancellation' ? 'st-cancellation_pending' : 'st-pending'), it.kind === 'cancellation' ? 'Cancellation' : 'Request'));
+        row.appendChild(btn('Review', 'small', () => openDetail(it.request_id)));
+        list.appendChild(row);
+      });
+    }
+    const loadInbox = () => api('approvals.inbox', PORTAL === 'business' ? { scope: 'all' } : {}).then((d) => renderInbox(d.items)).catch(fail);
+
+    function openDetail(id) {
+      api('approvals.detail', { request_id: id }).then((d) => {
+        detailCard.textContent = '';
+        detailCard.classList.remove('hidden');
+        const isCancel = d.request.status === 'cancellation_pending';
+        detailCard.appendChild(el('h2', '', (isCancel ? 'Cancellation: ' : '') + d.employee.full_name));
+        detailCard.appendChild(el('p', '', d.leave_type.name + ' - ' + rangeText(d.request) + ' - ' + fmtUnits(d.request.requested_units, d.leave_type.unit)));
+        if (d.request.comment) detailCard.appendChild(el('p', 'muted', 'Note from employee: ' + d.request.comment));
+        const chips = el('div', 'chips');
+        d.days.forEach((x) => chips.appendChild(el('span', 'chip', fmtDate(x.date) + (x.units !== 1 ? ' (' + fmtNum(x.units) + ')' : ''))));
+        detailCard.appendChild(chips);
+        d.balances.forEach((b) => detailCard.appendChild(el('p', 'muted',
+          'Balance ' + b.leave_year + ': ' + fmtNum(b.available) + ' available, ' + fmtNum(b.requested) + ' requested' +
+          (b.other_pending > 0 ? ', ' + fmtNum(b.other_pending) + ' awaiting approval on other requests' : ''))));
+        if (d.staffing && d.staffing.message) detailCard.appendChild(el('p', 'warnmsg', d.staffing.message));
+        detailCard.appendChild(el('h3', '', 'Also away on these dates'));
+        if (!d.team_overlaps.length) detailCard.appendChild(el('p', 'muted', 'Nobody else in the team.'));
+        d.team_overlaps.forEach((o) => detailCard.appendChild(el('p', 'muted', o.employee + ': ' + fmtDate(o.start_date) + ' to ' + fmtDate(o.end_date) + ' (' + o.status + ')')));
+        if (d.history.length) {
+          detailCard.appendChild(el('h3', '', 'History'));
+          d.history.forEach((h) => detailCard.appendChild(el('p', 'muted', h.by + ': ' + h.decision.replace('_', ' ') + (h.comment ? ' - ' + h.comment : ''))));
+        }
+        const comment = el('textarea');
+        comment.placeholder = 'Reason (needed to reject or ask for changes)';
+        comment.maxLength = 500;
+        detailCard.appendChild(comment);
+        const bar = el('div', 'btns');
+        const decide = (decision, override) => {
+          if (decision !== 'approved' && !comment.value.trim()) { toast('Please give a reason'); comment.focus(); return; }
+          api('approvals.decide', { request_id: id, decision: decision, comment: comment.value.trim() || undefined, expected_version: d.request.version, override_staffing: override ? true : undefined })
+            .then(() => { toast('Done', true); detailCard.classList.add('hidden'); detailCard.textContent = ''; loadInbox(); refreshBadge(); })
+            .catch((e) => {
+              if (e.code === 'STAFFING_LIMIT') { if (confirm(e.message + '\n\nApprove anyway?')) decide(decision, true); return; }
+              toast(e.message);
+              if (e.code === 'STALE') { detailCard.classList.add('hidden'); loadInbox(); }
+            });
+        };
+        bar.appendChild(btn('Close', 'ghost', () => detailCard.classList.add('hidden')));
+        if (!isCancel) bar.appendChild(btn('Ask for changes', 'ghost', () => decide('changes_requested')));
+        bar.appendChild(btn(isCancel ? 'Decline cancellation' : 'Reject', 'danger', () => decide('rejected')));
+        bar.appendChild(btn(isCancel ? 'Approve cancellation' : 'Approve', '', () => decide('approved')));
+        detailCard.appendChild(bar);
+        if (detailCard.scrollIntoView) detailCard.scrollIntoView({ behavior: 'smooth' });
+      }).catch(fail);
+    }
+
+    // cover while away
+    delegCard.appendChild(el('p', 'muted', 'Choose someone to decide your requests while you are away.'));
+    const dForm = el('form');
+    const to = mkInput('text', { placeholder: 'Their employee number', maxLength: 20 });
+    const from = mkInput('date'); from.value = todayStr();
+    const until = mkInput('date');
+    const row = el('div', 'row');
+    row.append(mkField('Cover', to), mkField('From', from), mkField('Until', until));
+    const dBtn = el('button', '', 'Set cover'); dBtn.type = 'submit';
+    dForm.append(row, dBtn);
+    const dList = el('div');
+    delegCard.append(dForm, dList);
+    function loadDeleg() {
+      return api('approvals.delegations').then((d) => {
+        dList.textContent = '';
+        d.delegations.forEach((x) => {
+          const r = el('div', 'rowcard');
+          const m = el('div', 'grow');
+          m.appendChild(el('div', 'strong', x.direction === 'given' ? 'Your cover: ' + x.to : 'You cover for: ' + x.from));
+          m.appendChild(el('div', 'muted', fmtDate(x.starts_on) + ' to ' + fmtDate(x.ends_on)));
+          r.appendChild(m);
+          if (x.direction === 'given') r.appendChild(btn('Remove', 'ghost small', () => api('approvals.remove_delegation', { id: x.id }).then(loadDeleg).catch(fail)));
+          dList.appendChild(r);
+        });
+      }).catch(fail);
+    }
+    dForm.onsubmit = (ev) => {
+      ev.preventDefault();
+      if (!to.value.trim() || !from.value || !until.value) { toast('Enter who covers and the dates'); return; }
+      api('approvals.delegate', { to_employee_number: to.value, starts_on: from.value, ends_on: until.value })
+        .then(() => { toast('Cover set', true); to.value = ''; return loadDeleg(); }).catch(fail);
+    };
+    loadInbox();
+    loadDeleg();
+  };
+
+  // ---- notifications ---------------------------------------------------
+  screens.notifications = function (v) {
+    const c = card('Notifications');
+    v.appendChild(c);
+    const list = el('div');
+    function load() {
+      return api('notifications.list', { limit: 50 }).then((d) => {
+        list.textContent = '';
+        if (!d.notifications.length) list.appendChild(el('p', 'muted', 'No notifications yet.'));
+        d.notifications.forEach((n) => {
+          const r = el('div', 'rowcard' + (n.read_at ? '' : ' unread'));
+          const m = el('div', 'grow');
+          m.appendChild(el('div', 'strong', n.title));
+          if (n.body) m.appendChild(el('div', 'muted', n.body));
+          m.appendChild(el('div', 'muted small', new Date(n.created_at).toLocaleString('en-GB')));
+          r.appendChild(m);
+          list.appendChild(r);
+        });
+      }).catch(fail);
+    }
+    c.appendChild(btn('Mark all as read', 'ghost small', () => api('notifications.mark_read', { all: true }).then(() => { load(); refreshBadge(); }).catch(fail)));
+    c.appendChild(list);
+    load();
+  };
+
+  // ---- change my PIN ---------------------------------------------------
+  screens.account = function (v) {
+    const c = card('Change my PIN');
+    v.appendChild(c);
+    const f = el('form');
+    const cur = mkInput('password', { inputMode: 'numeric', maxLength: 6, autocomplete: 'off' });
+    const n1 = mkInput('password', { inputMode: 'numeric', maxLength: 6, autocomplete: 'off' });
+    const n2 = mkInput('password', { inputMode: 'numeric', maxLength: 6, autocomplete: 'off' });
+    const row = el('div', 'row');
+    row.append(mkField('Current PIN', cur), mkField('New PIN (6 digits)', n1), mkField('New PIN again', n2));
+    const saveBtn = el('button', '', 'Change PIN'); saveBtn.type = 'submit';
+    f.append(row, saveBtn);
+    f.onsubmit = (ev) => {
+      ev.preventDefault();
+      if (n1.value !== n2.value) { toast('The new PINs do not match'); return; }
+      api('staff.change_pin', { current_pin: cur.value, new_pin: n1.value })
+        .then(() => { toast('PIN changed. Your other sessions were signed out.', true); cur.value = ''; n1.value = ''; n2.value = ''; })
+        .catch(fail);
+    };
+    c.appendChild(f);
+  };
+
+
+  function showPin(title, pin, note) {
+    $('modalTitle').textContent = title;
+    $('modalPin').textContent = pin;
+    $('modalNote').textContent = note || '';
+    $('modal').classList.remove('hidden');
+  }
+  $('modalClose').onclick = function () { $('modal').classList.add('hidden'); $('modalPin').textContent = ''; };
+  $('modalCopy').onclick = function () {
+    var text = $('modalNote').dataset.copy || $('modalPin').textContent;
+    var done = function () { toast('Copied', true); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () {});
+    else toast('Copy not available - note the PIN down');
+  };
+
+  // ---- business: helpers ---------------------------------------------------
+  const mkSelect = (opts, value) => {
+    const s = el('select');
+    opts.forEach((o) => { const op = el('option', '', o[1]); op.value = o[0]; s.appendChild(op); });
+    if (value !== undefined) s.value = value;
+    return s;
+  };
+  function parseCsv(text) {
+    const rows = []; let row = [], cur = '', q = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (q) {
+        if (c === '"' && text[i + 1] === '"') { cur += '"'; i++; }
+        else if (c === '"') q = false;
+        else cur += c;
+      } else if (c === '"') q = true;
+      else if (c === ',') { row.push(cur); cur = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        row.push(cur); cur = '';
+        if (row.some((x) => x.trim() !== '')) rows.push(row);
+        row = [];
+      } else cur += c;
+    }
+    row.push(cur);
+    if (row.some((x) => x.trim() !== '')) rows.push(row);
+    return rows;
+  }
+  function downloadCsv(name, rows) {
+    const esc = (v) => { v = v === null || v === undefined ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    const blob = new Blob([rows.map((r) => r.map(esc).join(',')).join('\r\n')], { type: 'text/csv' });
+    const a = el('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+  function downloadJson(name, obj) {
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+    const a = el('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+  const WEEKDAYS = [['mon', 'Mon'], ['tue', 'Tue'], ['wed', 'Wed'], ['thu', 'Thu'], ['fri', 'Fri'], ['sat', 'Sat'], ['sun', 'Sun']];
+  const patternText = (p) => WEEKDAYS.filter((d) => p[d[0]] > 0).map((d) => d[1] + ' ' + fmtNum(p[d[0]])).join(', ') || 'No working days';
+  const listBox = () => el('div');
+
+  // ---- business: setup -----------------------------------------------------
+  screens.setup = function (v) {
+    const yearsCard = card('Leave years');
+    const polCard = card('Leave policies');
+    const schedCard = card('Work schedules');
+    const typesCard = card('Types of leave');
+    const holCard = card('Bank holiday changes');
+    const allocCard = card('Yearly allocation');
+    const teamsCard = card('Teams and cover limits');
+    const carryCard = card('Carry over unused leave');
+    const emailCard = card('Email notifications');
+    const retCard = card('Data retention');
+    [yearsCard, polCard, schedCard, typesCard, holCard, teamsCard, allocCard, carryCard, emailCard, retCard].forEach((c) => v.appendChild(c));
+    let O = null;
+
+    const reload = () => api('setup.overview').then((d) => { O = d; draw(); }).catch(fail);
+    const send = (action, payload, okMsg) => api(action, payload).then((d) => { toast(okMsg || 'Saved', true); return reload().then(() => d); }).catch(fail);
+
+    function draw() {
+      drawYears(); drawPolicies(); drawSchedules(); drawTypes(); drawHolidays(); drawTeams(); drawAlloc(); drawCarry(); drawEmail(); drawRetention();
+    }
+
+    function drawYears() {
+      yearsCard.textContent = ''; yearsCard.appendChild(el('h2', '', 'Leave years'));
+      yearsCard.appendChild(el('p', 'muted', 'Leave is allocated per leave year. Add the next year before it starts.'));
+      O.leave_years.forEach((y) => yearsCard.appendChild(el('div', 'rowcard', y.label + ': ' + fmtDate(y.starts_on) + ' to ' + fmtDate(y.ends_on))));
+      const f = el('form'); const row = el('div', 'row');
+      const label = mkInput('text', { placeholder: 'e.g. 2027', maxLength: 20 });
+      const from = mkInput('date'); const to = mkInput('date');
+      row.append(mkField('Name', label), mkField('Starts', from), mkField('Ends', to));
+      const b = el('button', '', 'Add leave year'); b.type = 'submit'; f.append(row, b);
+      f.onsubmit = (ev) => { ev.preventDefault(); send('setup.add_year', { label: label.value, starts_on: from.value, ends_on: to.value }, 'Leave year added'); };
+      yearsCard.appendChild(f);
+    }
+
+    function policyForm(p) {
+      const r = (p && p.rules) || {};
+      const f = el('form', 'rowcard'); f.style.display = 'block';
+      f.appendChild(el('h3', '', p ? 'Edit ' + p.name : 'New policy'));
+      const name = mkInput('text', { value: p ? p.name : '', maxLength: 80 });
+      const ent = mkInput('number', { value: r.entitlement !== undefined ? r.entitlement : 28, step: '0.5', min: '0.5' });
+      const fth = mkInput('number', { value: r.full_time_hours || 37.5, step: '0.5' });
+      const co = mkInput('number', { value: r.carry_over_max || 0, step: '0.5', min: '0' });
+      const cx = mkInput('text', { value: r.carry_over_expiry || '03-31', maxLength: 5 });
+      const bd = mkInput('number', { value: r.backdate_days || 0, min: '0' });
+      const neg = mkInput('checkbox'); neg.checked = !!r.allow_negative;
+      const row = el('div', 'row');
+      row.append(mkField('Policy name', name), mkField('Days a year (full time)', ent), mkField('Full-time hours a week', fth),
+        mkField('Carry over up to (days)', co), mkField('Carried days expire (MM-DD)', cx), mkField('Days back requests may start', bd));
+      f.appendChild(row);
+      const l = el('label'); l.style.cssText = 'text-transform:none;letter-spacing:0;font-size:14px;color:var(--text)'; l.append(neg, document.createTextNode(' Allow requests beyond the balance'));
+      f.appendChild(l);
+      let assign = null;
+      if (!p) { assign = mkInput('checkbox'); assign.checked = false; const l2 = el('label'); l2.style.cssText = l.style.cssText; l2.append(assign, document.createTextNode(' Give this policy to every current employee')); f.appendChild(l2); }
+      const b = el('button', '', p ? 'Save changes' : 'Create policy'); b.type = 'submit'; b.style.marginTop = '10px'; f.appendChild(b);
+      f.onsubmit = (ev) => {
+        ev.preventDefault();
+        send('setup.save_policy', { id: p ? p.id : undefined, name: name.value, entitlement: ent.value, full_time_hours: fth.value, carry_over_max: co.value,
+          carry_over_expiry: cx.value, backdate_days: bd.value, allow_negative: neg.checked, assign_to_all: assign ? assign.checked : undefined }, 'Policy saved');
+      };
+      return f;
+    }
+    function drawPolicies() {
+      polCard.textContent = ''; polCard.appendChild(el('h2', '', 'Leave policies'));
+      polCard.appendChild(el('p', 'muted', 'Changing a policy does not change leave already allocated or requests already made. Re-run the yearly allocation for new joiners.'));
+      const holder = el('div');
+      O.policies.forEach((p) => {
+        const row = el('div', 'rowcard'); const m = el('div', 'grow');
+        m.appendChild(el('div', 'strong', p.name + ' (version ' + p.version + ')'));
+        m.appendChild(el('div', 'muted', fmtNum(p.rules.entitlement) + ' days, ' + p.employees + ' employees' + (p.rules.carry_over_max ? ', carry over up to ' + fmtNum(p.rules.carry_over_max) : '') + (p.rules.allow_negative ? ', can go negative' : '')));
+        row.appendChild(m);
+        row.appendChild(btn('Edit', 'ghost small', () => { holder.textContent = ''; holder.appendChild(policyForm(p)); }));
+        polCard.appendChild(row);
+      });
+      polCard.appendChild(holder);
+      polCard.appendChild(btn('New policy', 'ghost small', () => { holder.textContent = ''; holder.appendChild(policyForm(null)); }));
+      // assign
+      polCard.appendChild(el('h3', '', 'Give a policy to people'));
+      const f = el('form');
+      const pol = mkSelect(O.policies.map((p) => [p.id, p.name]));
+      const from = mkInput('date'); from.value = todayStr();
+      const who = el('textarea'); who.placeholder = 'Employee numbers separated by commas, or leave empty for everyone'; who.style.minHeight = '50px';
+      const row = el('div', 'row'); row.append(mkField('Policy', pol), mkField('From', from));
+      const b = el('button', '', 'Assign'); b.type = 'submit'; f.append(row, who, b);
+      f.onsubmit = (ev) => {
+        ev.preventDefault();
+        const nums = who.value.split(/[\s,;]+/).filter(Boolean);
+        send('setup.assign_policy', { policy_id: pol.value, effective_from: from.value, all: nums.length === 0, employee_numbers: nums.length ? nums : undefined }, 'Policy assigned');
+      };
+      polCard.appendChild(f);
+    }
+
+    function scheduleForm(s) {
+      const f = el('form', 'rowcard'); f.style.display = 'block';
+      f.appendChild(el('h3', '', s ? 'Edit ' + s.name : 'New schedule'));
+      const name = mkInput('text', { value: s ? s.name : '', maxLength: 80 });
+      f.appendChild(mkField('Schedule name', name));
+      f.appendChild(el('p', 'muted small', 'Hours worked on each day. Use 0 for days not worked.'));
+      const row = el('div', 'row'); const inputs = {};
+      WEEKDAYS.forEach((d) => { inputs[d[0]] = mkInput('number', { value: s ? s.week_pattern[d[0]] : (['sat', 'sun'].includes(d[0]) ? 0 : 7.5), step: '0.25', min: '0', max: '24' }); row.appendChild(mkField(d[1], inputs[d[0]])); });
+      f.appendChild(row);
+      const b = el('button', '', s ? 'Save changes' : 'Create schedule'); b.type = 'submit'; f.appendChild(b);
+      f.onsubmit = (ev) => {
+        ev.preventDefault();
+        const pattern = {}; WEEKDAYS.forEach((d) => { pattern[d[0]] = Number(inputs[d[0]].value || 0); });
+        send('setup.save_schedule', { id: s ? s.id : undefined, name: name.value, week_pattern: pattern }, 'Schedule saved');
+      };
+      return f;
+    }
+    function drawSchedules() {
+      schedCard.textContent = ''; schedCard.appendChild(el('h2', '', 'Work schedules'));
+      const holder = el('div');
+      O.schedules.forEach((s) => {
+        const row = el('div', 'rowcard'); const m = el('div', 'grow');
+        m.appendChild(el('div', 'strong', s.name));
+        m.appendChild(el('div', 'muted', patternText(s.week_pattern) + ' - ' + s.employees + ' employees'));
+        row.appendChild(m);
+        row.appendChild(btn('Edit', 'ghost small', () => { holder.textContent = ''; holder.appendChild(scheduleForm(s)); }));
+        schedCard.appendChild(row);
+      });
+      schedCard.appendChild(holder);
+      schedCard.appendChild(btn('New schedule', 'ghost small', () => { holder.textContent = ''; holder.appendChild(scheduleForm(null)); }));
+      schedCard.appendChild(el('h3', '', 'Put people on a schedule'));
+      const f = el('form');
+      const sel = mkSelect(O.schedules.map((s) => [s.id, s.name]));
+      const from = mkInput('date'); from.value = todayStr();
+      const who = el('textarea'); who.placeholder = 'Employee numbers separated by commas, or leave empty for everyone'; who.style.minHeight = '50px';
+      const row = el('div', 'row'); row.append(mkField('Schedule', sel), mkField('From', from));
+      const b = el('button', '', 'Assign'); b.type = 'submit'; f.append(row, who, b);
+      f.onsubmit = (ev) => {
+        ev.preventDefault();
+        const nums = who.value.split(/[\s,;]+/).filter(Boolean);
+        send('setup.assign_schedule', { schedule_id: sel.value, effective_from: from.value, all: nums.length === 0, employee_numbers: nums.length ? nums : undefined }, 'Schedule assigned');
+      };
+      schedCard.appendChild(f);
+    }
+
+    function drawTypes() {
+      typesCard.textContent = ''; typesCard.appendChild(el('h2', '', 'Types of leave'));
+      const holder = el('div');
+      const form = (t) => {
+        const f = el('form', 'rowcard'); f.style.display = 'block';
+        f.appendChild(el('h3', '', t ? 'Edit ' + t.name : 'New type of leave'));
+        const code = mkInput('text', { value: t ? t.code : '', maxLength: 30, disabled: !!t, placeholder: 'e.g. study' });
+        const name = mkInput('text', { value: t ? t.name : '', maxLength: 60 });
+        const unit = mkSelect([['days', 'Days'], ['hours', 'Hours']], t ? t.unit : 'days');
+        const chk = (label, val) => { const i = mkInput('checkbox'); i.checked = val; const l = el('label'); l.style.cssText = 'text-transform:none;letter-spacing:0;font-size:14px;color:var(--text);display:block;margin:4px 0'; l.append(i, document.createTextNode(' ' + label)); return [i, l]; };
+        const [tr, trL] = chk('Counts against a balance', t ? t.balance_tracked : true);
+        const [ap, apL] = chk('Needs approval', t ? t.requires_approval : true);
+        const [ac, acL] = chk('In use', t ? t.active : true);
+        const row = el('div', 'row'); row.append(mkField('Code', code), mkField('Name', name), mkField('Counted in', unit));
+        f.append(row, trL, apL, acL);
+        const b = el('button', '', t ? 'Save changes' : 'Create'); b.type = 'submit'; b.style.marginTop = '10px'; f.appendChild(b);
+        f.onsubmit = (ev) => { ev.preventDefault(); send('setup.save_leave_type', { id: t ? t.id : undefined, code: code.value, name: name.value, unit: unit.value, balance_tracked: tr.checked, requires_approval: ap.checked, active: ac.checked, is_sickness: t ? t.is_sickness : false }, 'Saved'); };
+        return f;
+      };
+      O.leave_types.forEach((t) => {
+        const row = el('div', 'rowcard'); const m = el('div', 'grow');
+        m.appendChild(el('div', 'strong', t.name + (t.active ? '' : ' (not in use)')));
+        m.appendChild(el('div', 'muted', t.code + ', ' + t.unit + (t.balance_tracked ? ', has a balance' : ', no balance') + (t.requires_approval ? ', needs approval' : ', no approval') + (t.is_sickness ? ', sickness' : '')));
+        row.appendChild(m);
+        if (!t.is_sickness) row.appendChild(btn('Edit', 'ghost small', () => { holder.textContent = ''; holder.appendChild(form(t)); }));
+        typesCard.appendChild(row);
+      });
+      typesCard.appendChild(holder);
+      typesCard.appendChild(btn('New type of leave', 'ghost small', () => { holder.textContent = ''; holder.appendChild(form(null)); }));
+    }
+
+    function drawHolidays() {
+      holCard.textContent = ''; holCard.appendChild(el('h2', '', 'Bank holiday changes'));
+      holCard.appendChild(el('p', 'muted', 'Add a company shutdown day, or mark a bank holiday as a normal working day for your business.'));
+      O.overrides.forEach((o) => {
+        const row = el('div', 'rowcard'); const m = el('div', 'grow');
+        m.appendChild(el('div', 'strong', fmtDate(o.holiday_date) + ' - ' + o.name));
+        m.appendChild(el('div', 'muted', o.is_working_day ? 'Working day (not a holiday for us)' : 'Closed day'));
+        row.appendChild(m);
+        row.appendChild(btn('Remove', 'ghost small', () => send('setup.remove_override', { holiday_date: o.holiday_date, calendar_code: o.calendar_code }, 'Removed')));
+        holCard.appendChild(row);
+      });
+      const f = el('form'); const row = el('div', 'row');
+      const date = mkInput('date'); const name = mkInput('text', { placeholder: 'e.g. Summer shutdown', maxLength: 80 });
+      const kind = mkSelect([['closed', 'Closed day (not charged)'], ['work', 'Working day (bank holiday we work)']]);
+      row.append(mkField('Date', date), mkField('Name', name), mkField('Type', kind));
+      const b = el('button', '', 'Add'); b.type = 'submit'; f.append(row, b);
+      f.onsubmit = (ev) => { ev.preventDefault(); send('setup.add_override', { holiday_date: date.value, name: name.value, is_working_day: kind.value === 'work' }, 'Added'); };
+      holCard.appendChild(f);
+    }
+
+    function drawEmail() {
+      emailCard.textContent = ''; emailCard.appendChild(el('h2', '', 'Email notifications'));
+      emailCard.appendChild(el('p', 'muted', 'When on, people who have an email address on their record also get each notification by email (new requests to approve, decisions, absences reported). Emails never contain the reason for an absence.'));
+      const cb = mkInput('checkbox'); cb.checked = !!(O.business.settings && O.business.settings.email_enabled);
+      const l = el('label'); l.style.cssText = 'text-transform:none;letter-spacing:0;font-size:14px;color:var(--text);display:block;margin:6px 0'; l.append(cb, document.createTextNode(' Send notifications by email'));
+      emailCard.append(l, btn('Save', 'ghost small', () => send('setup.save_business', { email_notifications: cb.checked }, 'Saved')));
+    }
+    function drawRetention() {
+      retCard.textContent = ''; retCard.appendChild(el('h2', '', 'Data retention'));
+      retCard.appendChild(el('p', 'muted', 'People\'s personal details are not needed for ever. Choose how many years after someone leaves their details are anonymised automatically (name, email, notes, absence reasons). Leave totals are kept. Leave at 0 to keep everything until you anonymise people yourself. Ask your adviser what period suits your business.'));
+      const yrs = mkInput('number', { min: '0', max: '15', value: (O.business.settings && O.business.settings.retention_years) || 0 }); yrs.style.width = '120px';
+      const row = el('div', 'row'); row.appendChild(mkField('Years after leaving (0 = off)', yrs));
+      retCard.append(row, btn('Save', 'ghost small', () => send('setup.save_business', { retention_years: Number(yrs.value) }, 'Saved')));
+    }
+    function drawCarry() {
+      carryCard.textContent = ''; carryCard.appendChild(el('h2', '', 'Carry over unused leave'));
+      carryCard.appendChild(el('p', 'muted', 'Moves unused leave from one year to the next, up to each person\'s policy limit, in half days. Run it after the new year has been allocated or before. Carried days expire on the date set in the policy. Safe to repeat.'));
+      const a = mkSelect(O.leave_years.map((y) => [y.label, y.label])); const z = mkSelect(O.leave_years.map((y) => [y.label, y.label]));
+      if (O.leave_years.length > 1) z.value = O.leave_years[O.leave_years.length - 1].label;
+      const out = el('div');
+      const row = el('div', 'row'); row.append(mkField('From year', a), mkField('To year', z));
+      const b = btn('Carry over', '', () => {
+        b.disabled = true;
+        api('hr.carry_over', { from_year_label: a.value, to_year_label: z.value }).then((d) => {
+          out.textContent = ''; out.appendChild(el('p', 'okmsg', d.carried + ' people, ' + fmtNum(d.days) + ' days carried over' + (d.no_policy ? '; ' + d.no_policy + ' have no policy' : '') + '.'));
+        }).catch(fail).then(() => { b.disabled = false; });
+      });
+      carryCard.append(row, b, out);
+    }
+
+    function drawTeams() {
+      teamsCard.textContent = ''; teamsCard.appendChild(el('h2', '', 'Teams and cover limits'));
+      teamsCard.appendChild(el('p', 'muted', 'Optionally limit how many people in a team can be away at the same time. Approvers are warned and must confirm before going over the limit.'));
+      if (!O.departments.length) teamsCard.appendChild(el('p', 'muted', 'No teams yet. Teams appear when you give employees a department.'));
+      O.departments.forEach((d) => {
+        const row = el('div', 'rowcard'); const m = el('div', 'grow'); m.appendChild(el('div', 'strong', d.name)); row.appendChild(m);
+        const inp = mkInput('number', { min: '1', placeholder: 'No limit', value: d.max_concurrent_absent || '' }); inp.style.width = '120px'; row.appendChild(inp);
+        row.appendChild(btn('Save', 'ghost small', () => send('setup.save_department', { name: d.name, max_concurrent_absent: inp.value === '' ? null : Number(inp.value) }, 'Saved')));
+        teamsCard.appendChild(row);
+      });
+    }
+
+    function drawAlloc() {
+      allocCard.textContent = ''; allocCard.appendChild(el('h2', '', 'Yearly allocation'));
+      allocCard.appendChild(el('p', 'muted', 'Gives every current employee their leave for a year from their policy and schedule. Part-time staff are pro-rated, joiners and leavers by the days they work, rounded up to the half day. Safe to repeat: people who already have it are left alone.'));
+      const sel = mkSelect(O.leave_years.map((y) => [y.label, y.label]));
+      const out = el('div');
+      const b = btn('Allocate leave', '', () => {
+        b.disabled = true;
+        api('hr.allocate_year', { year_label: sel.value }).then((d) => {
+          out.textContent = '';
+          out.appendChild(el('p', 'okmsg', d.allocated + ' allocated, ' + d.already_allocated + ' already had it' + (d.failed ? ', ' + d.failed + ' failed' : '') + '.'));
+          if (d.skipped_count) {
+            out.appendChild(el('p', 'warnmsg', d.skipped_count + ' skipped:'));
+            d.skipped.forEach((s) => out.appendChild(el('p', 'muted small', s.employee_number + ': ' + s.reason)));
+          }
+        }).catch(fail).then(() => { b.disabled = false; });
+      });
+      const row = el('div', 'row'); row.appendChild(mkField('Leave year', sel));
+      allocCard.append(row, b, out);
+    }
+    reload();
+  };
+
+  // ---- business: balances and adjustments ---------------------------------
+  screens.balances = function (v) {
+    const c = card('Leave balances'); v.appendChild(c);
+    const f = el('form'); const num = mkInput('text', { placeholder: 'Employee number', maxLength: 20 }); num.autocapitalize = 'characters';
+    const go2 = el('button', '', 'Look up'); go2.type = 'submit';
+    const row = el('div', 'row'); row.appendChild(mkField('Employee', num)); f.append(row, go2);
+    const out = el('div'); c.append(f, out);
+    let current = null;
+    function show() {
+      return api('hr.balances', { employee_number: current }).then((d) => {
+        out.textContent = '';
+        out.appendChild(el('h3', '', d.employee.full_name + ' (' + d.employee.employee_number + ')'));
+        if (!d.balances.length) out.appendChild(el('p', 'muted', 'Nothing has been allocated yet.'));
+        d.balances.forEach((b) => out.appendChild(el('div', 'rowcard', b.leave_type + ' ' + b.leave_year + ': ' + fmtNum(b.available) + ' available | entitlement ' + fmtNum(b.entitlement) + ', booked ' + fmtNum(b.booked) + ', taken ' + fmtNum(b.taken) + ', awaiting approval ' + fmtNum(b.pending))));
+        // adjustment
+        out.appendChild(el('h3', '', 'Adjust a balance'));
+        out.appendChild(el('p', 'muted small', 'Adds or removes days. Every adjustment is recorded with your note and cannot be edited later.'));
+        const af = el('form'); const ar = el('div', 'row');
+        const code = mkInput('text', { value: 'annual', maxLength: 30 });
+        const year = mkInput('text', { placeholder: 'Leave year name', maxLength: 20 });
+        if (d.balances[0]) year.value = d.balances[0].leave_year;
+        const qty = mkInput('number', { step: '0.5', placeholder: 'e.g. 2 or -1' });
+        ar.append(mkField('Leave type code', code), mkField('Leave year', year), mkField('Days (+ or -)', qty));
+        const note = mkInput('text', { placeholder: 'Reason (required)', maxLength: 200 });
+        const ab = el('button', '', 'Post adjustment'); ab.type = 'submit'; ab.style.marginTop = '10px';
+        af.append(ar, mkField('Reason', note), ab);
+        af.onsubmit = (ev) => {
+          ev.preventDefault();
+          if (!note.value.trim() || !Number(qty.value)) { toast('Enter the days and a reason'); return; }
+          api('hr.allocate', { employee_number: current, leave_type_code: code.value, year_label: year.value, quantity: Number(qty.value), note: note.value.trim(), request_key: String(Date.now()) + Math.random().toString(36).slice(2, 8) })
+            .then(() => { toast('Adjustment posted', true); show(); }).catch(fail);
+        };
+        out.appendChild(af);
+      }).catch((e) => { out.textContent = ''; fail(e); });
+    }
+    f.onsubmit = (ev) => { ev.preventDefault(); current = num.value.trim().toUpperCase(); if (current) show(); };
+  };
+
+  // ---- business: people (add, edit, leavers, CSV import) ------------------
+  screens.people = function (v) {
+    const isOwner = S.employee.role === 'owner';
+    const editHolder = el('div');
+    const form = el('form', 'card');
+    form.appendChild(el('h2', '', 'Add an employee'));
+    const num = mkInput('text', { placeholder: 'e.g. E1001', maxLength: 20 }); num.autocapitalize = 'characters';
+    const name = mkInput('text', { maxLength: 100 });
+    const email = mkInput('email', { placeholder: 'optional', maxLength: 200 });
+    const role = mkSelect([['employee', 'Employee'], ['manager', 'Manager']].concat(isOwner ? [['hr', 'HR']] : []));
+    const dept = mkInput('text', { placeholder: 'optional', maxLength: 80 });
+    const mgr = mkInput('text', { placeholder: 'manager number, optional', maxLength: 20 }); mgr.autocapitalize = 'characters';
+    const start = mkInput('date'); start.value = todayStr();
+    const r1 = el('div', 'row'); r1.append(mkField('Employee number', num), mkField('Full name', name), mkField('Email', email));
+    const r2 = el('div', 'row'); r2.append(mkField('Role', role), mkField('Department', dept), mkField('Manager', mgr), mkField('Start date', start));
+    const add = el('button', '', 'Add employee'); add.type = 'submit';
+    form.append(r1, r2, add);
+
+    const importCard = card('Import from a spreadsheet');
+    const listCard = card('People'); const wrap = el('div'); wrap.style.overflowX = 'auto'; listCard.appendChild(wrap);
+    v.append(form, editHolder, importCard, listCard);
+
+    // ---- import
+    importCard.appendChild(el('p', 'muted', 'Save your spreadsheet as CSV with these column headings: employee_number, full_name, email, role, department, manager_employee_number, employment_start (YYYY-MM-DD). Everything is checked before anything is created.'));
+    importCard.appendChild(btn('Download a blank template', 'ghost small', () => downloadCsv('employees_template.csv', [['employee_number', 'full_name', 'email', 'role', 'department', 'manager_employee_number', 'employment_start'], ['E2001', 'Alex Example', 'alex@example.com', 'employee', 'Sales', 'E1001', todayStr()]])));
+    const file = mkInput('file', { accept: '.csv,text/csv' }); file.style.marginTop = '10px';
+    const importOut = el('div');
+    importCard.append(file, importOut);
+    file.onchange = () => {
+      const f = file.files[0]; if (!f) return;
+      const rd = new FileReader();
+      rd.onload = () => {
+        const table = parseCsv(String(rd.result).replace(/^\uFEFF/, ''));
+        if (table.length < 2) { toast('The file has no rows'); return; }
+        const head = table[0].map((h) => h.trim().toLowerCase().replace(/\s+/g, '_'));
+        const rows = table.slice(1).map((r) => { const o = {}; head.forEach((h, i) => { o[h] = (r[i] || '').trim(); }); return o; });
+        importOut.textContent = '';
+        importOut.appendChild(el('p', 'muted', 'Checking ' + rows.length + ' rows...'));
+        api('hr.import_validate', { rows: rows }).then((d) => {
+          importOut.textContent = '';
+          if (!d.valid) {
+            importOut.appendChild(el('p', 'problem', d.error_count + ' problem' + (d.error_count === 1 ? '' : 's') + ' found. Nothing was imported. Fix the file and choose it again.'));
+            d.errors.forEach((e) => importOut.appendChild(el('p', 'muted small', 'Row ' + (e.row + 1) + ' (' + e.field + '): ' + e.message)));
+            return;
+          }
+          importOut.appendChild(el('p', 'okmsg', 'All ' + d.count + ' rows look good.'));
+          const go = btn('Import ' + d.count + ' people', '', () => runImport(rows, go));
+          importOut.appendChild(go);
+        }).catch(fail);
+      };
+      rd.readAsText(f);
+    };
+    async function runImport(rows, button) {
+      button.disabled = true;
+      const created = [], failed = [];
+      try {
+        for (let i = 0; i < rows.length; i += 50) {
+          importOut.appendChild(el('p', 'muted small', 'Creating ' + Math.min(i + 50, rows.length) + ' of ' + rows.length + '...'));
+          const d = await api('hr.import_create', { rows: rows.slice(i, i + 50) });
+          created.push.apply(created, d.created); failed.push.apply(failed, d.failed);
+        }
+        const createdSet = new Set(created.map((c) => c.employee_number));
+        const pairs = rows.filter((r) => r.manager_employee_number && createdSet.has(r.employee_number.toUpperCase())).map((r) => ({ employee_number: r.employee_number, manager_employee_number: r.manager_employee_number }));
+        for (let i = 0; i < pairs.length; i += 200) await api('hr.import_managers', { pairs: pairs.slice(i, i + 200) });
+      } catch (e) { fail(e); }
+      importOut.textContent = '';
+      importOut.appendChild(el('p', 'okmsg', created.length + ' people created' + (failed.length ? ', ' + failed.length + ' not created' : '') + '.'));
+      failed.forEach((f) => importOut.appendChild(el('p', 'problem small', f.employee_number + ': ' + f.message)));
+      if (created.length) {
+        importOut.appendChild(el('p', 'warnmsg', 'These PINs are shown once. Download them now and give each person their PIN.'));
+        importOut.appendChild(btn('Download PINs (CSV)', '', () => downloadCsv('new_employee_pins.csv', [['employee_number', 'full_name', 'pin']].concat(created.map((c) => [c.employee_number, c.full_name, c.pin])))));
+      }
+      load();
+    }
+
+    // ---- list and actions
+    function editForm(e, deps, byId) {
+      const f = el('form', 'card');
+      f.appendChild(el('h2', '', 'Edit ' + e.full_name + ' (' + e.employee_number + ')'));
+      const name2 = mkInput('text', { value: e.full_name, maxLength: 100 });
+      const email2 = mkInput('email', { value: e.email || '', maxLength: 200 });
+      const role2 = mkSelect([['employee', 'Employee'], ['manager', 'Manager']].concat(isOwner ? [['hr', 'HR']] : []), e.role);
+      const dept2 = mkInput('text', { value: deps[e.department_id] || '', maxLength: 80 });
+      const mgr2 = mkInput('text', { value: e.manager_id && byId[e.manager_id] ? byId[e.manager_id].employee_number : '', maxLength: 20 });
+      const cal2 = mkSelect([['', 'Same as the business'], ['ENG-WLS', 'England and Wales'], ['SCT', 'Scotland'], ['NIR', 'Northern Ireland']], e.calendar_code || '');
+      const ra = el('div', 'row'); ra.append(mkField('Full name', name2), mkField('Email', email2), mkField('Role', role2));
+      const rb = el('div', 'row'); rb.append(mkField('Department', dept2), mkField('Manager number', mgr2), mkField('Bank holidays', cal2));
+      const save = el('button', '', 'Save'); save.type = 'submit';
+      const cancel = btn('Cancel', 'ghost', () => { editHolder.textContent = ''; });
+      const bar = el('div', 'btns'); bar.append(cancel, save);
+      f.append(ra, rb, bar);
+      f.onsubmit = (ev) => {
+        ev.preventDefault();
+        const payload = { employee_number: e.employee_number, full_name: name2.value, email: email2.value, department: dept2.value, manager_employee_number: mgr2.value.trim().toUpperCase(), calendar_code: cal2.value };
+        if (e.role !== 'owner') payload.role = role2.value;
+        api('hr.update_employee', payload).then(() => { toast('Saved', true); editHolder.textContent = ''; load(); }).catch(fail);
+      };
+      return f;
+    }
+    function load() {
+      return api('hr.list_employees').then((d) => {
+        const deps = {}; (d.departments || []).forEach((x) => { deps[x.id] = x.name; });
+        const byId = {}; d.employees.forEach((x) => { byId[x.id] = x; });
+        const t = el('table'); const hr = el('tr');
+        ['No.', 'Name', 'Role', 'Department', 'Manager', 'Start', 'Status', ''].forEach((h) => hr.appendChild(el('th', '', h)));
+        const th = el('thead'); th.appendChild(hr); t.appendChild(th);
+        const tb = el('tbody');
+        d.employees.forEach((e) => {
+          const tr = el('tr');
+          tr.appendChild(el('td', '', e.employee_number)); tr.appendChild(el('td', '', e.full_name));
+          const rc = el('td'); rc.appendChild(el('span', 'badge ' + e.role, ROLE_LABEL[e.role] || e.role)); tr.appendChild(rc);
+          tr.appendChild(el('td', 'muted', deps[e.department_id] || '-'));
+          tr.appendChild(el('td', 'muted', e.manager_id && byId[e.manager_id] ? byId[e.manager_id].employee_number : '-'));
+          tr.appendChild(el('td', 'muted', e.employment_start ? fmtDate(e.employment_start) : '-'));
+          tr.appendChild(el('td', 'muted', e.anonymised_at ? 'Left, anonymised' : e.status === 'terminated' ? 'Left ' + fmtDate(e.employment_end) : e.status));
+          const ac = el('td');
+          if (e.status === 'active') {
+            ac.appendChild(btn('Edit', 'ghost small', () => { editHolder.textContent = ''; editHolder.appendChild(editForm(e, deps, byId)); window.scrollTo && window.scrollTo(0, 0); }));
+            if (e.id !== S.employee.id && e.role !== 'owner') {
+              ac.appendChild(document.createTextNode(' '));
+              ac.appendChild(btn('Reset PIN', 'ghost small', () => {
+                if (!confirm('Reset the PIN for ' + e.full_name + '? They will be signed out.')) return;
+                api('hr.reset_pin', { employee_number: e.employee_number }).then((r) => showPin('New PIN - ' + e.full_name, r.pin, 'Employee number ' + r.employee_number)).catch(fail);
+              }));
+              ac.appendChild(document.createTextNode(' '));
+              ac.appendChild(btn('Left', 'ghost small', () => {
+                const day = prompt('Last working day for ' + e.full_name + ' (YYYY-MM-DD)', todayStr());
+                if (!day) return;
+                if (!confirm('Mark ' + e.full_name + ' as left on ' + day + '? Pending requests are withdrawn and later approved leave is cancelled.')) return;
+                api('hr.terminate_employee', { employee_number: e.employee_number, employment_end: day })
+                  .then((r) => { toast(r.withdrawn + ' withdrawn, ' + r.cancelled + ' cancelled', true); load(); }).catch(fail);
+              }));
+            }
+          }
+          if (e.status === 'terminated' && !e.anonymised_at) {
+            ac.appendChild(btn('Anonymise', 'ghost small', () => {
+              if (!confirm('Anonymise ' + e.full_name + '?\n\nTheir name, email, notes and absence reasons are removed for good. Leave totals are kept for your records. This cannot be undone. Export their data first if you may need it.')) return;
+              api('hr.anonymise_employee', { employee_number: e.employee_number }).then(() => { toast('Anonymised', true); load(); }).catch(fail);
+            }));
+            ac.appendChild(document.createTextNode(' '));
+          }
+          ac.appendChild(btn('Export data', 'ghost small', () => {
+            api('hr.export_employee', { employee_number: e.employee_number }).then((d) => { downloadJson('employee_' + e.employee_number + '.json', d); toast('Exported', true); }).catch(fail);
+          }));
+          tr.appendChild(ac); tb.appendChild(tr);
+        });
+        t.appendChild(tb); wrap.textContent = ''; wrap.appendChild(t);
+      }).catch(fail);
+    }
+    form.onsubmit = (ev) => {
+      ev.preventDefault();
+      if (!num.value.trim() || !name.value.trim() || !start.value) { toast('Employee number, name and start date are required'); return; }
+      const payload = { employee_number: num.value, full_name: name.value, role: role.value, employment_start: start.value };
+      if (email.value.trim()) payload.email = email.value;
+      if (dept.value.trim()) payload.department = dept.value;
+      if (mgr.value.trim()) payload.manager_employee_number = mgr.value;
+      add.disabled = true;
+      api('hr.create_employee', payload).then((r) => {
+        showPin('Employee added - ' + r.employee.full_name, r.pin, 'Employee number ' + r.employee.employee_number);
+        num.value = ''; name.value = ''; email.value = ''; dept.value = ''; mgr.value = '';
+        return load();
+      }).catch(fail).then(() => { add.disabled = false; });
+    };
+    load();
+  };
+
+  // ---- business: sickness records -----------------------------------------
+  const SICK_LABEL = { illness: 'Illness', injury: 'Injury', appointment: 'Medical appointment', other: 'Other' };
+  screens.sickness = function (v) {
+    const form = el('form', 'card');
+    form.appendChild(el('h2', '', 'Record an absence'));
+    form.appendChild(el('p', 'muted', 'Reasons and notes are visible to HR only. Managers see dates, and colleagues only see that someone is away.'));
+    const num = mkInput('text', { placeholder: 'Employee number', maxLength: 20 }); num.autocapitalize = 'characters';
+    const from = mkInput('date'); from.value = todayStr();
+    const to = mkInput('date');
+    const reason = mkSelect([['', 'No reason given'], ['illness', 'Illness'], ['injury', 'Injury'], ['appointment', 'Medical appointment'], ['other', 'Other']]);
+    const details = mkInput('text', { placeholder: 'Optional note (HR only)', maxLength: 500 });
+    const row = el('div', 'row'); row.append(mkField('Employee', num), mkField('First day', from), mkField('Last day (leave empty if ongoing)', to), mkField('Reason', reason));
+    const save = el('button', '', 'Record'); save.type = 'submit';
+    form.append(row, mkField('Note', details), save);
+    const listCard = card('Absences');
+    const wrap = el('div');
+    listCard.appendChild(wrap);
+    v.append(form, listCard);
+    function load() {
+      return api('sickness.list', { limit: 100 }).then((d) => {
+        wrap.textContent = '';
+        if (!d.rows.length) { wrap.appendChild(el('p', 'muted', 'No absences recorded.')); return; }
+        d.rows.forEach((r) => {
+          const rc = el('div', 'rowcard'); const m = el('div', 'grow');
+          m.appendChild(el('div', 'strong', r.employee + ' (' + r.employee_number + ')'));
+          m.appendChild(el('div', 'muted', fmtDate(r.starts_on) + (r.ends_on ? ' to ' + fmtDate(r.ends_on) : ' - ongoing') + (r.reason_code ? ' - ' + (SICK_LABEL[r.reason_code] || r.reason_code) : '')));
+          if (r.details) m.appendChild(el('div', 'muted small', r.details));
+          rc.appendChild(m);
+          if (!r.ends_on) rc.appendChild(btn('Back at work', 'ghost small', () => api('sickness.close', { id: r.id }).then(() => { toast('Saved', true); load(); }).catch(fail)));
+          wrap.appendChild(rc);
+        });
+      }).catch(fail);
+    }
+    form.onsubmit = (ev) => {
+      ev.preventDefault();
+      if (!num.value.trim() || !from.value) { toast('Enter the employee and the first day'); return; }
+      api('sickness.record', { employee_number: num.value, starts_on: from.value, ends_on: to.value || undefined, reason_code: reason.value || undefined, details: details.value.trim() || undefined })
+        .then(() => { toast('Recorded', true); num.value = ''; details.value = ''; load(); }).catch(fail);
+    };
+    load();
+  };
+
+  // ---- business: home summary, reports, audit log --------------------------
+  function plainTable(headers, rows) {
+    const t = el('table'); const hr = el('tr');
+    headers.forEach((h) => hr.appendChild(el('th', '', h)));
+    const th = el('thead'); th.appendChild(hr); t.appendChild(th);
+    const tb = el('tbody');
+    rows.forEach((r) => { const tr = el('tr'); r.forEach((c) => tr.appendChild(el('td', '', c === null || c === undefined ? '' : String(c)))); tb.appendChild(tr); });
+    t.appendChild(tb);
+    const w = el('div'); w.style.overflowX = 'auto'; w.appendChild(t);
+    return w;
+  }
+
+  screens.home = function (v) {
+    const hello = card('Today');
+    v.appendChild(hello);
+    const stats = el('div', 'stats');
+    hello.appendChild(stats);
+    const awayCard = card('Away today');
+    const soonCard = card('Coming up in the next 14 days');
+    v.append(awayCard, soonCard);
+    api('reports.summary').then((d) => {
+      const stat = (big, label, onclick) => {
+        const s = el('div', 'stat'); s.appendChild(el('div', 'big', String(big))); s.appendChild(el('div', 'sub', label));
+        if (onclick) { s.style.cursor = 'pointer'; s.onclick = onclick; }
+        stats.appendChild(s);
+      };
+      stat(d.headcount, 'people employed');
+      stat(d.pending_requests + d.pending_cancellations, 'waiting for a decision', () => go('approvals'));
+      stat(d.away_today.length, 'away today', null);
+      if (!d.away_today.length) awayCard.appendChild(el('p', 'muted', 'Nobody is away today.'));
+      d.away_today.forEach((a) => awayCard.appendChild(el('div', 'rowcard', a.employee + ' (' + a.number + ')' + (a.sick ? ' - absent' : a.part_day ? ' - part of the day' : ''))));
+      if (!d.upcoming.length) soonCard.appendChild(el('p', 'muted', 'No approved leave starting soon.'));
+      d.upcoming.forEach((u) => soonCard.appendChild(el('div', 'rowcard', u.employee + ': ' + fmtDate(u.start_date) + (u.end_date !== u.start_date ? ' to ' + fmtDate(u.end_date) : '') + ' (' + fmtNum(u.units) + ')')));
+    }).catch(fail);
+  };
+
+  screens.reports = function (v) {
+    const balCard = card('Leave balances report');
+    const absCard = card('Absence report');
+    const sickCard = card('Sickness report');
+    v.append(balCard, absCard, sickCard);
+
+    // balances
+    const yearSel = el('select'); const deptSel = el('select');
+    const bRow = el('div', 'row'); bRow.append(mkField('Leave year', yearSel), mkField('Department', deptSel));
+    const bOut = el('div'); let bRows = [];
+    const bRun = btn('Run report', '', () => {
+      bRun.disabled = true;
+      api('reports.balances', { year_label: yearSel.value, department: deptSel.value || undefined }).then((d) => {
+        bRows = d.rows; bOut.textContent = '';
+        if (!d.rows.length) { bOut.appendChild(el('p', 'muted', 'Nothing to show for that year.')); return; }
+        bOut.appendChild(el('p', 'muted small', d.rows.length + ' rows'));
+        bOut.appendChild(plainTable(['No.', 'Name', 'Department', 'Leave', 'Entitlement', 'Booked', 'Taken', 'Awaiting', 'Available'],
+          d.rows.map((r) => [r.employee_number, r.full_name, r.department, r.leave_type, fmtNum(r.entitlement), fmtNum(r.booked), fmtNum(r.taken), fmtNum(r.pending), fmtNum(r.available)])));
+        bOut.appendChild(btn('Download CSV', 'ghost small', () => downloadCsv('leave_balances_' + yearSel.value + '.csv',
+          [['employee_number', 'full_name', 'department', 'status', 'leave_type', 'unit', 'leave_year', 'entitlement', 'booked', 'taken', 'expired', 'pending', 'available']]
+            .concat(bRows.map((r) => [r.employee_number, r.full_name, r.department, r.status, r.leave_type, r.unit, r.leave_year, r.entitlement, r.booked, r.taken, r.expired, r.pending, r.available])))));
+      }).catch(fail).then(() => { bRun.disabled = false; });
+    });
+    balCard.append(bRow, bRun, bOut);
+
+    // absence
+    const from = mkInput('date'); const to = mkInput('date');
+    const t0 = todayStr(); from.value = t0;
+    const plus = new Date(Date.parse(t0) + 30 * 86400000).toISOString().slice(0, 10); to.value = plus;
+    const aDept = el('select');
+    const statusBoxes = {};
+    const sRow = el('div', 'checks');
+    [['approved', 'Approved'], ['pending', 'Waiting'], ['completed', 'Taken'], ['cancellation_pending', 'Cancellation asked'], ['rejected', 'Rejected'], ['cancelled', 'Cancelled']].forEach((s) => {
+      const i = mkInput('checkbox'); i.checked = ['approved', 'completed', 'cancellation_pending'].includes(s[0]); statusBoxes[s[0]] = i;
+      const l = el('label'); l.append(i, document.createTextNode(' ' + s[1])); sRow.appendChild(l);
+    });
+    const aRow = el('div', 'row'); aRow.append(mkField('From', from), mkField('To', to), mkField('Department', aDept));
+    const aOut = el('div'); let aRows = [];
+    const aRun = btn('Run report', '', () => {
+      aRun.disabled = true;
+      api('reports.absence', { from: from.value, to: to.value, department: aDept.value || undefined, statuses: Object.keys(statusBoxes).filter((k) => statusBoxes[k].checked) }).then((d) => {
+        aRows = d.rows; aOut.textContent = '';
+        if (!d.rows.length) { aOut.appendChild(el('p', 'muted', 'No leave in that period.')); return; }
+        aOut.appendChild(el('p', 'muted small', d.rows.length + ' requests'));
+        aOut.appendChild(plainTable(['No.', 'Name', 'Department', 'Leave', 'Dates', 'Amount', 'Status'],
+          d.rows.map((r) => [r.employee_number, r.full_name, r.department, r.leave_type, rangeText(r), fmtUnits(r.units, r.unit), STATUS_LABEL[r.status] || r.status])));
+        aOut.appendChild(btn('Download CSV', 'ghost small', () => downloadCsv('absence_' + from.value + '_to_' + to.value + '.csv',
+          [['employee_number', 'full_name', 'department', 'leave_type', 'start_date', 'end_date', 'start_half', 'end_half', 'amount', 'unit', 'status', 'submitted_at', 'decided_at']]
+            .concat(aRows.map((r) => [r.employee_number, r.full_name, r.department, r.leave_type, r.start_date, r.end_date, r.start_half || '', r.end_half || '', r.units, r.unit, r.status, r.submitted_at || '', r.decided_at || ''])))));
+      }).catch(fail).then(() => { aRun.disabled = false; });
+    });
+    absCard.append(aRow, sRow, aRun, aOut);
+    // sickness report
+    const sFrom = mkInput('date'); const sTo = mkInput('date');
+    sFrom.value = new Date(Date.parse(todayStr()) - 90 * 86400000).toISOString().slice(0, 10); sTo.value = todayStr();
+    const skRow = el('div', 'row'); skRow.append(mkField('From', sFrom), mkField('To', sTo));
+    const sOut = el('div'); let sRows = [];
+    const sRun = btn('Run report', '', () => {
+      sRun.disabled = true;
+      api('reports.sickness', { from: sFrom.value, to: sTo.value }).then((d) => {
+        sRows = d.rows; sOut.textContent = '';
+        if (!d.rows.length) { sOut.appendChild(el('p', 'muted', 'No absences in that period.')); return; }
+        sOut.appendChild(el('p', 'muted small', d.rows.length + ' absences'));
+        sOut.appendChild(plainTable(['No.', 'Name', 'Department', 'First day', 'Last day', 'Weekdays in period', 'Reason'],
+          d.rows.map((r) => [r.employee_number, r.full_name, r.department, fmtDate(r.starts_on), r.ends_on ? fmtDate(r.ends_on) : 'ongoing', r.weekdays_in_range, r.reason_code ? (SICK_LABEL[r.reason_code] || r.reason_code) : ''])));
+        sOut.appendChild(btn('Download CSV', 'ghost small', () => downloadCsv('sickness_' + sFrom.value + '_to_' + sTo.value + '.csv',
+          [['employee_number', 'full_name', 'department', 'starts_on', 'ends_on', 'weekdays_in_period', 'reason']].concat(sRows.map((r) => [r.employee_number, r.full_name, r.department, r.starts_on, r.ends_on || '', r.weekdays_in_range, r.reason_code || ''])))));
+      }).catch(fail).then(() => { sRun.disabled = false; });
+    });
+    sickCard.append(el('p', 'muted small', 'Visible to HR only.'), skRow, sRun, sOut);
+
+    api('setup.overview').then((d) => {
+      d.leave_years.forEach((y) => { const o = el('option', '', y.label); o.value = y.label; yearSel.appendChild(o); });
+      const now = todayStr();
+      const cur = d.leave_years.find((y) => y.starts_on <= now && now <= y.ends_on);
+      if (cur) yearSel.value = cur.label;
+      [deptSel, aDept].forEach((s) => {
+        const all = el('option', '', 'All departments'); all.value = ''; s.appendChild(all);
+        d.departments.forEach((x) => { const o = el('option', '', x.name); o.value = x.name; s.appendChild(o); });
+      });
+    }).catch(fail);
+  };
+
+  screens.audit = function (v) {
+    const c = card('Audit log');
+    v.appendChild(c);
+    c.appendChild(el('p', 'muted', 'A permanent record of who did what. Entries cannot be edited or deleted.'));
+    const kind = el('select');
+    [['', 'Everything'], ['leave.request.', 'Leave requests and decisions'], ['balance.', 'Balances and allocations'], ['employee.', 'Employees'], ['policy.', 'Policies'], ['schedule.', 'Schedules'], ['session.', 'Sign-ins'], ['business.', 'Account (platform)']]
+      .forEach((o) => { const op = el('option', '', o[1]); op.value = o[0]; kind.appendChild(op); });
+    const who = mkInput('text', { placeholder: 'Employee number', maxLength: 20 });
+    const from = mkInput('date'); const to = mkInput('date');
+    const row = el('div', 'row'); row.append(mkField('Show', kind), mkField('By', who), mkField('From', from), mkField('To', to));
+    const out = el('div');
+    const bar = el('div', 'btns'); bar.style.justifyContent = 'space-between';
+    const info = el('span', 'muted small');
+    let offset = 0; const PAGE = 50; let last = [];
+    const prev = btn('Newer', 'ghost small', () => { offset = Math.max(0, offset - PAGE); load(); });
+    const next = btn('Older', 'ghost small', () => { offset += PAGE; load(); });
+    bar.append(prev, info, next);
+    const run = btn('Show', '', () => { offset = 0; load(); });
+    c.append(row, run, out, bar);
+    function load() {
+      api('audit.list', { action_prefix: kind.value || undefined, actor_employee_number: who.value.trim() || undefined, from: from.value || undefined, to: to.value || undefined, limit: PAGE, offset: offset }).then((d) => {
+        last = d.rows; out.textContent = '';
+        if (!d.rows.length) out.appendChild(el('p', 'muted', 'Nothing matches.'));
+        else out.appendChild(plainTable(['When', 'Who', 'What', 'Details'], d.rows.map((r) => [
+          new Date(r.at).toLocaleString('en-GB'), r.actor, r.action, JSON.stringify(r.changes || {}).slice(0, 160)])));
+        info.textContent = d.total ? (offset + 1) + ' to ' + (offset + d.rows.length) + ' of ' + d.total : '';
+        prev.disabled = offset === 0; next.disabled = offset + PAGE >= d.total;
+        if (d.rows.length) out.appendChild(btn('Download these rows (CSV)', 'ghost small', () => downloadCsv('audit_log.csv', [['when', 'who', 'action', 'record_type', 'record_id', 'details']].concat(last.map((r) => [r.at, r.actor, r.action, r.entity_type, r.entity_id || '', JSON.stringify(r.changes || {})])))));
+      }).catch(fail);
+    }
+    load();
+  };
+
+  // ---- resume a session in the same tab -------------------------------
+  try {
+    var saved = JSON.parse(sessionStorage.getItem('hol_biz_session') || 'null');
+    if (saved && new Date(saved.exp) > new Date()) {
+      S.token = saved.token; S.employee = saved.employee; S.business = saved.business;
+      api('staff.me').then(function (d) { S.employee = d.employee; S.business = d.business; showApp(); })
+        .catch(function () { endSession(); });
+    }
+  } catch (e) { sessionStorage.removeItem('hol_biz_session'); }
+})();
+</script>
+</body>
+</html>
