@@ -173,7 +173,7 @@
       }
       return j.data;
     }, function (e) {
-      if (e && e.message === 'Failed to fetch') throw new Error('Cannot reach the server. Check your connection.');
+      if (e && (e instanceof TypeError || /failed to fetch|networkerror|load failed|fetch failed/i.test(e.message))) throw new Error('Cannot reach the server. Check your connection, or ask your provider to check the system address.');
       throw e;
     });
   }
