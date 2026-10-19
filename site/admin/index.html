@@ -127,7 +127,7 @@
     t.textContent = msg;
     t.className = good ? 'good' : '';
     clearTimeout(toast._t);
-    toast._t = setTimeout(function () { t.className = 'hidden'; }, 4500);
+    toast._t = setTimeout(function () { t.className = 'hidden'; }, msg.length > 90 ? 14000 : 4500);
   }
 
   function call(action, payload) {
@@ -251,7 +251,7 @@
       $('holCard').classList.remove('hidden');
       toast('Connected', true);
     }).catch(function (e) {
-      toast(e.message === 'Failed to fetch' ? 'Cannot reach the function. Check the URL and that it is deployed.' : e.message);
+      toast((e instanceof TypeError || /failed to fetch|networkerror|load failed|fetch failed/i.test(e.message)) ? 'Cannot reach the function. Check: (1) the Function URL above is your project\'s address ending /functions/v1/cbs-hol, (2) the function is deployed with Verify JWT switched OFF, (3) this website\'s address is listed in the HOL_ALLOWED_ORIGINS secret in Supabase.' : e.message);
     }).then(function () { btn.disabled = false; });
   };
 
