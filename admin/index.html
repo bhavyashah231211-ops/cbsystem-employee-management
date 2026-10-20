@@ -1,294 +1,182 @@
 <!DOCTYPE html>
-<html lang="en-GB">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
-<title>CBSystem - Employee Management - Admin</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<html lang="en-GB"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>CBSystem Employee Management - Admin</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap">
+<script>window.CBS_API='https://yjdmjhxnvsdlevfwuxvh.supabase.co/functions/v1/cbs-hol';</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-  :root{--bg:#0d0d0f;--card:#17171b;--line:#2a2a31;--text:#ececf0;--muted:#8d8d99;--accent:#ff7a1a;--ok:#3ecf8e;--warn:#f5b942;--bad:#ff5d5d}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 'DM Sans',system-ui,sans-serif}
-  header{display:flex;align-items:baseline;gap:12px;padding:18px 24px;border-bottom:1px solid var(--line)}
-  h1{font:400 30px 'Bebas Neue',sans-serif;letter-spacing:1px;margin:0}
-  h1 span{color:var(--accent)}
-  header small{color:var(--muted)}
-  main{max-width:1000px;margin:0 auto;padding:24px;display:grid;gap:20px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
-  h2{font:400 22px 'Bebas Neue',sans-serif;letter-spacing:.8px;margin:0 0 14px;color:var(--accent)}
-  label{display:block;font-size:12px;color:var(--muted);margin:0 0 4px;text-transform:uppercase;letter-spacing:.6px}
-  input,select,textarea{width:100%;background:#0f0f12;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:inherit}
-  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
-  .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px}
-  button{background:var(--accent);color:#111;border:0;border-radius:8px;padding:10px 16px;font:700 14px 'DM Sans',sans-serif;cursor:pointer}
-  button:hover{filter:brightness(1.1)}
-  button:disabled{opacity:.5;cursor:not-allowed}
-  button.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
-  button.ghost:hover{border-color:var(--accent)}
-  button.danger{background:transparent;color:var(--bad);border:1px solid var(--bad)}
-  button.small{padding:6px 10px;font-size:12px}
-  table{width:100%;border-collapse:collapse}
-  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
-  th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:500}
-  td.actions{display:flex;gap:6px;flex-wrap:wrap}
-  .badge{padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700}
-  .badge.active{background:#12301f;color:var(--ok)}
-  .badge.suspended{background:#3a2f12;color:var(--warn)}
-  .badge.closed{background:#3a1616;color:var(--bad)}
-  .muted{color:var(--muted)}
-  .hidden{display:none!important}
-  #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2a1414;border:1px solid var(--bad);color:#ffd5d5;padding:10px 16px;border-radius:8px;max-width:90vw}
-  #toast.good{background:#10281c;border-color:var(--ok);color:#c9f5df}
-  .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px}
-  .modal .box{background:var(--card);border:1px solid var(--accent);border-radius:12px;padding:22px;width:100%;max-width:620px}
-  .modal textarea{height:230px;font-family:ui-monospace,Menlo,monospace;font-size:13px}
-  .warn{color:var(--warn);font-size:13px;margin:0 0 10px}
-  .btns{display:flex;gap:10px;margin-top:14px;justify-content:flex-end}
-  footer{text-align:right;padding:16px 24px;color:var(--accent);font:400 18px 'Bebas Neue',sans-serif;letter-spacing:1px}
-</style>
-</head>
+:root{--bg:#0d0d0f;--card:#17171b;--in:#0f0f12;--bd:#2a2a31;--ac:#ff7a1a;--tx:#ececf0;--t2:#8d8d99;--gr:#3ecf8e;--rd:#ff5d5d}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--tx);font:14px/1.5 'DM Sans',system-ui,sans-serif;padding:22px 16px 60px;max-width:860px;margin:0 auto}
+h1{font:400 2.2rem 'Bebas Neue',Impact,sans-serif;letter-spacing:2px}
+h1 span{color:var(--ac)}
+h2{font-size:.95rem;margin-bottom:10px}
+.sub{color:var(--t2);margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:14px}
+label{display:block;font-size:.75rem;font-weight:600;color:var(--t2);margin:8px 0 4px}
+input,textarea{width:100%;background:var(--in);border:1px solid var(--bd);border-radius:8px;padding:9px 11px;color:var(--tx);font:inherit}
+input:focus,textarea:focus{outline:2px solid var(--ac);outline-offset:1px}
+textarea{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.78rem;min-height:230px;resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:200px}
+button{border:0;border-radius:8px;padding:9px 15px;font:700 .8rem 'DM Sans',sans-serif;cursor:pointer;background:var(--ac);color:#111;margin-top:12px}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.o{background:transparent;border:1px solid var(--bd);color:var(--tx);margin:0;padding:5px 10px;font-size:.72rem}
+button.o:hover{border-color:var(--ac)}
+button.d{border-color:var(--rd);color:var(--rd)}
+button.d:hover{background:var(--rd);color:#fff}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:8px 6px;border-top:1px solid var(--bd);font-size:.8rem}
+th{border:0;color:var(--t2);font-size:.7rem}
+td.act{display:flex;gap:6px;flex-wrap:wrap}
+.on{color:var(--gr)}.off{color:var(--rd)}
+#msg{margin-top:10px;min-height:20px;font-weight:600}.err{color:var(--rd)}.ok{color:var(--gr)}
+.hide{display:none}
+</style></head>
 <body>
-<header><h1>CBSystem <span>Employee Management</span></h1><small>Platform admin</small></header>
-<main>
+<h1>CBSystem <span>Employee Management</span></h1>
+<p class="sub">Admin - create and manage businesses</p>
 
-  <section class="card" id="connectCard">
-    <h2>Connect</h2>
+<div class="card" id="login">
+  <h2>Admin key</h2>
+  <label for="ak">The ADMIN_KEY saved in your Supabase secrets</label>
+  <input id="ak" type="password" autocomplete="off">
+  <button id="go">Connect</button>
+</div>
+
+<div id="app" class="hide">
+  <div class="card">
+    <h2>New business</h2>
     <div class="row">
-      <div><label for="fnUrl">Function URL</label><input id="fnUrl" autocomplete="off"></div>
-      <div><label for="adminKey">Admin key</label><input id="adminKey" type="password" autocomplete="off" placeholder="ADMIN_KEY secret"></div>
+      <div><label for="nm">Business name</label><input id="nm" placeholder="e.g. Creative Foods" autocomplete="off"></div>
+      <div><label for="bid">Link name (used in the login links)</label><input id="bid" placeholder="creative-foods" autocomplete="off"></div>
     </div>
-    <button id="connectBtn">Connect</button>
-    <span class="muted" style="margin-left:10px">The key is kept for this browser tab only.</span>
-  </section>
+    <button id="create">Create business</button>
+  </div>
 
-  <section class="card hidden" id="createCard">
-    <h2>Create a business</h2>
-    <div class="row">
-      <div><label for="bizName">Business name</label><input id="bizName" maxlength="80" placeholder="e.g. Anchor Hospitality Ltd"></div>
-      <div><label for="bizRegion">Bank holiday region</label>
-        <select id="bizRegion">
-          <option value="ENG-WLS">England and Wales</option>
-          <option value="SCT">Scotland</option>
-          <option value="NIR">Northern Ireland</option>
-        </select></div>
-      <div><label for="bizSlug">Link name (optional)</label><input id="bizSlug" maxlength="40" placeholder="auto from name"></div>
-    </div>
-    <button id="createBtn">Create business</button>
-  </section>
+  <div class="card hide" id="res">
+    <h2 id="rt">Ready to send</h2>
+    <p class="sub" style="margin:0 0 8px" id="rsub">The staff key and Owner PIN are shown only once. Copy them now.</p>
+    <textarea id="txt" readonly></textarea>
+    <div id="qr" class="hide" style="margin-top:12px;background:#fff;padding:8px;width:max-content;border-radius:6px"></div>
+    <p class="sub hide" id="qrnote" style="margin:6px 0 0">Scan to open the staff login. The QR holds the link only, never the key.</p>
+    <button id="copy">Copy message</button>
+  </div>
 
-  <section class="card hidden" id="holCard">
-    <h2>Bank holidays</h2>
-    <p class="muted" style="margin-top:0">Loads England and Wales, Scotland and Northern Ireland bank holidays from GOV.UK. Safe to repeat; run it at least once a year.</p>
-    <button id="holBtn">Update bank holidays</button>
-    <span class="muted" id="holMsg" style="margin-left:10px"></span>
-  </section>
-
-  <section class="card hidden" id="listCard">
-    <h2>Businesses</h2>
-    <div style="overflow-x:auto">
-      <table>
-        <thead><tr><th>Name</th><th>Link name</th><th>Region</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
-        <tbody id="rows"></tbody>
-      </table>
-    </div>
-    <p id="emptyMsg" class="muted hidden">No businesses yet.</p>
-  </section>
-</main>
-<footer>CBSystem</footer>
-
-<div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-  <div class="box">
-    <h2 id="modalTitle"></h2>
-    <p class="warn">These details are shown once and are not stored. Copy them now.</p>
-    <textarea id="modalText" readonly></textarea>
-    <div class="btns">
-      <button class="ghost" id="modalClose">Close</button>
-      <button id="modalCopy">Copy message</button>
-    </div>
+  <div class="card">
+    <h2>All businesses</h2>
+    <div style="overflow-x:auto"><table><thead><tr><th>Name</th><th>Link name</th><th>Status</th><th>People</th><th>Created</th><th></th></tr></thead><tbody id="tb"></tbody></table></div>
   </div>
 </div>
-<div id="toast" class="hidden" role="status"></div>
+<div id="msg" role="status"></div>
 
 <script>
-(function () {
-  'use strict';
-  var DEFAULT_URL = 'https://yjdmjhxnvsdlevfwuxvh.supabase.co/functions/v1/cbs-hol';
-  var $ = function (id) { return document.getElementById(id); };
-  var url = localStorage.getItem('hol_admin_url') || DEFAULT_URL;
-  var key = sessionStorage.getItem('hol_admin_key') || '';
+let KEY='';
+const $=id=>document.getElementById(id);
+const say=(t,c)=>{$('msg').textContent=t||'';$('msg').className=c||''};
+const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,38);
+const base=()=>location.origin+location.pathname.replace(/admin\/(index\.html)?$/,'');
+const staffUrl=id=>base()+'staff/?b='+encodeURIComponent(id);
+const bizUrl=id=>base()+'business/?b='+encodeURIComponent(id);
+const fmt=d=>d?new Date(d).toLocaleString('en-GB'):'-';
 
-  $('fnUrl').value = url;
-  $('adminKey').value = key;
+async function api(action,body){
+  if(!window.CBS_API)throw new Error('The Supabase function address is missing.');
+  let r;
+  try{r=await fetch(CBS_API,{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({action,...body})})}
+  catch(e){throw new Error('Cannot reach the server. Check your connection and that the cbs-hol function is deployed.')}
+  const j=await r.json().catch(()=>({ok:false,error:{message:'Unexpected reply from the server'}}));
+  if(!r.ok||j.ok===false){const e=j.error;throw new Error((e&&e.message)||(typeof e==='string'?e:'')||('Error '+r.status))}
+  return j.data!==undefined?j.data:j;
+}
+function showMessage(title,lines,link,sub){
+  $('rt').textContent=title;
+  $('rsub').textContent=sub||'The staff key and Owner PIN are shown only once. Copy them now.';
+  $('txt').value=lines.join('\n');
+  const q=$('qr');q.textContent='';
+  const ok=link&&window.QRCode;
+  q.classList.toggle('hide',!ok);$('qrnote').classList.toggle('hide',!ok);
+  if(ok)new QRCode(q,{text:link,width:150,height:150});
+  $('res').classList.remove('hide');$('res').scrollIntoView({behavior:'smooth'});
+}
 
-  function toast(msg, good) {
-    var t = $('toast');
-    t.textContent = msg;
-    t.className = good ? 'good' : '';
-    clearTimeout(toast._t);
-    toast._t = setTimeout(function () { t.className = 'hidden'; }, msg.length > 90 ? 14000 : 4500);
-  }
-
-  function call(action, payload) {
-    var body = Object.assign({ action: action }, payload || {});
-    var ctl = new AbortController();
-    var timer = setTimeout(function () { ctl.abort(); }, 25000);
-    return fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-key': key },
-      body: JSON.stringify(body),
-      signal: ctl.signal
-    }).catch(function (e) {
-      clearTimeout(timer);
-      if (e && e.name === 'AbortError') throw new Error('The function did not reply within 25 seconds. It is probably not deployed correctly (see SETUP.md, Part 3).');
-      throw e;
-    }).then(function (r) {
-      clearTimeout(timer);
-      return r.json().catch(function () { throw new Error('Unexpected reply from server'); });
-    }).then(function (j) {
-      if (!j.ok) throw new Error((j.error && j.error.message) || 'Request failed');
-      return j.data;
+async function load(){
+  const d=await api('admin.list');
+  const list=d.businesses||[];
+  const tb=$('tb');tb.textContent='';
+  if(!list.length){const tr=tb.insertRow(),td=tr.insertCell();td.colSpan=6;td.textContent='No businesses yet. Create the first one above.';return}
+  list.forEach(b=>{
+    const tr=tb.insertRow();
+    tr.insertCell().textContent=b.name;
+    tr.insertCell().textContent=b.slug;
+    const st=tr.insertCell();st.textContent=b.active?'Active':'Paused';st.className=b.active?'on':'off';
+    tr.insertCell().textContent=b.employees!==undefined?b.employees:'-';
+    tr.insertCell().textContent=fmt(b.created_at);
+    const ac=tr.insertCell();ac.className='act';
+    const mk=(label,fn,cls)=>{const x=document.createElement('button');x.className='o'+(cls?' '+cls:'');x.textContent=label;x.onclick=async()=>{try{await fn()}catch(e){say(e.message,'err')}};ac.appendChild(x)};
+    mk('Details',async()=>{
+      say('');
+      const r=await api('admin.details',{slug:b.slug});
+      showMessage('Details: '+r.name,[
+        'Business: '+r.name+' ('+r.slug+')',
+        'Status: '+(r.active?'Active':'Paused'),
+        'Created: '+fmt(r.created_at),
+        'People: '+r.employees,
+        'Leave requests: '+(r.requests!==undefined?r.requests:'-'),'',
+        'Staff login: '+staffUrl(r.slug),
+        'Business (owner / HR) login: '+bizUrl(r.slug),'',
+        'Staff key and PINs are stored hashed and cannot be shown.',
+        'Use "New staff key" or "Reset owner PIN" if they are lost.'
+      ],staffUrl(r.slug),'Private information. Do not share this screen.');
     });
-  }
-
-  function showSecret(title, text) {
-    $('modalTitle').textContent = title;
-    $('modalText').value = text;
-    $('modal').classList.remove('hidden');
-    $('modalText').focus();
-    $('modalText').select();
-  }
-  $('modalClose').onclick = function () {
-    $('modal').classList.add('hidden');
-    $('modalText').value = '';
-  };
-  $('modalCopy').onclick = function () {
-    var ta = $('modalText');
-    ta.select();
-    var done = function () { toast('Copied', true); };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(ta.value).then(done, function () { document.execCommand('copy'); done(); });
-    } else { document.execCommand('copy'); done(); }
-  };
-
-  function el(tag, cls, text) {
-    var e = document.createElement(tag);
-    if (cls) e.className = cls;
-    if (text !== undefined) e.textContent = text;
-    return e;
-  }
-
-  var REGION = { 'ENG-WLS': 'England and Wales', 'SCT': 'Scotland', 'NIR': 'Northern Ireland' };
-
-  function actionBtn(label, cls, fn) {
-    var b = el('button', 'small ' + cls, label);
-    b.onclick = function () {
-      b.disabled = true;
-      Promise.resolve(fn()).catch(function (e) { toast(e.message); }).then(function () { b.disabled = false; });
-    };
-    return b;
-  }
-
-  function render(list) {
-    var tb = $('rows');
-    tb.textContent = '';
-    $('emptyMsg').classList.toggle('hidden', list.length > 0);
-    list.forEach(function (b) {
-      var tr = el('tr');
-      tr.appendChild(el('td', '', b.name));
-      tr.appendChild(el('td', 'muted', b.slug));
-      tr.appendChild(el('td', '', REGION[b.region] || b.region));
-      var st = el('td'); st.appendChild(el('span', 'badge ' + b.status, b.status)); tr.appendChild(st);
-      tr.appendChild(el('td', 'muted', new Date(b.created_at).toLocaleDateString('en-GB')));
-      var ac = el('td', 'actions');
-
-      if (b.status === 'active') {
-        ac.appendChild(actionBtn('Suspend', 'ghost', function () {
-          if (!confirm('Suspend ' + b.name + '? All staff will be signed out.')) return;
-          return setStatus(b, 'suspended');
-        }));
-      } else if (b.status === 'suspended') {
-        ac.appendChild(actionBtn('Activate', 'ghost', function () { return setStatus(b, 'active'); }));
-      }
-      if (b.status !== 'closed') {
-        ac.appendChild(actionBtn('Reset owner PIN', 'ghost', function () {
-          if (!confirm('Reset the owner PIN for ' + b.name + '? The owner will be signed out.')) return;
-          return call('admin.reset_owner_pin', { slug: b.slug }).then(function (d) {
-            showSecret('New owner PIN - ' + b.name,
-              'Your CBSystem - Employee Management owner PIN has changed.\nOwner sign-in: employee number OWNER, PIN ' + d.owner_pin);
-          });
-        }));
-        ac.appendChild(actionBtn('New staff key', 'ghost', function () {
-          if (!confirm('Rotate the staff key for ' + b.name + '? The old key stops working immediately.')) return;
-          return call('admin.rotate_staff_key', { slug: b.slug }).then(function (d) {
-            showSecret('New staff key - ' + b.name, d.message);
-          });
-        }));
-        ac.appendChild(actionBtn('Close', 'danger', function () {
-          if (!confirm('Close ' + b.name + '? Staff lose access. Data is kept.')) return;
-          return setStatus(b, 'closed');
-        }));
-      }
-      tr.appendChild(ac);
-      tb.appendChild(tr);
+    mk(b.active?'Pause':'Resume',async()=>{await api('admin.set_active',{slug:b.slug,active:!b.active});say(b.name+(b.active?' paused':' resumed'),'ok');load()});
+    mk('New staff key',async()=>{
+      if(!confirm('Make a new staff key for '+b.name+'? The old key stops working.'))return;
+      const r=await api('admin.reset_staff_key',{slug:b.slug});
+      showMessage('New staff key for '+b.name,['Staff login: '+staffUrl(b.slug),'New staff key: '+r.staff_key,'','Give the new key to staff. They enter it with their employee number and PIN.'],staffUrl(b.slug));
     });
-  }
-
-  function setStatus(b, status) {
-    return call('admin.set_status', { slug: b.slug, status: status }).then(function () {
-      toast(b.name + ' is now ' + status, true);
-      return refresh();
+    mk('Reset owner PIN',async()=>{
+      if(!confirm('Reset the Owner PIN for '+b.name+'? The Owner is signed out.'))return;
+      const r=await api('admin.reset_owner_pin',{slug:b.slug});
+      showMessage('New Owner PIN for '+b.name,['Business login: '+bizUrl(b.slug),'Employee number: OWNER','New Owner PIN: '+r.pin],bizUrl(b.slug));
     });
-  }
+    mk('Delete',async()=>{
+      const t=prompt('This permanently deletes "'+b.name+'" with all its people, leave and records. It cannot be undone.\n\nType the link name ('+b.slug+') to confirm:');
+      if(t===null)return;
+      if(t.trim().toLowerCase()!==b.slug){say('Link name did not match. Nothing was deleted.','err');return}
+      await api('admin.delete',{slug:b.slug,confirm:t.trim()});
+      $('res').classList.add('hide');
+      say(b.name+' deleted','ok');load();
+    },'d');
+  });
+}
 
-  function refresh() {
-    return call('admin.list_businesses').then(function (d) { render(d.businesses || []); });
-  }
-
-  $('connectBtn').onclick = function () {
-    url = $('fnUrl').value.trim();
-    key = $('adminKey').value;
-    if (!url || !key) { toast('Enter the function URL and admin key'); return; }
-    var btn = $('connectBtn'); btn.disabled = true;
-    refresh().then(function () {
-      localStorage.setItem('hol_admin_url', url);
-      sessionStorage.setItem('hol_admin_key', key);
-      $('createCard').classList.remove('hidden');
-      $('listCard').classList.remove('hidden');
-      $('holCard').classList.remove('hidden');
-      toast('Connected', true);
-    }).catch(function (e) {
-      toast((e instanceof TypeError || /failed to fetch|networkerror|load failed|fetch failed/i.test(e.message)) ? 'Cannot reach the function. Check: (1) the Function URL above is your project\'s address ending /functions/v1/cbs-hol, (2) the function is deployed with Verify JWT switched OFF, (3) this website\'s address is listed in the HOL_ALLOWED_ORIGINS secret in Supabase.' : e.message);
-    }).then(function () { btn.disabled = false; });
-  };
-
-  $('createBtn').onclick = function () {
-    var name = $('bizName').value.trim();
-    if (!name) { toast('Enter a business name'); return; }
-    var payload = { name: name, region: $('bizRegion').value };
-    var slug = $('bizSlug').value.trim();
-    if (slug) payload.slug = slug;
-    var btn = $('createBtn'); btn.disabled = true;
-    call('admin.create_business', payload).then(function (d) {
-      showSecret('Ready to send - ' + d.business.name, d.message);
-      $('bizName').value = ''; $('bizSlug').value = '';
-      return refresh();
-    }).catch(function (e) { toast(e.message); }).then(function () { btn.disabled = false; });
-  };
-
-  $('holBtn').onclick = function () {
-    var btn = $('holBtn'); btn.disabled = true; $('holMsg').textContent = 'Working...';
-    call('admin.seed_bank_holidays').then(function (d) {
-      $('holMsg').textContent = d.count + ' bank holidays saved (' + d.from + ' to ' + d.to + ')';
-      toast('Bank holidays updated', true);
-    }).catch(function (e) { $('holMsg').textContent = ''; toast(e.message); })
-      .then(function () { btn.disabled = false; });
-  };
-
-  // Auto-reconnect within the same tab
-  if (key) { $('connectBtn').click(); }
-})();
+$('go').onclick=async()=>{
+  KEY=$('ak').value.trim();say('');
+  if(!KEY){say('Enter the admin key','err');return}
+  try{await load();$('login').classList.add('hide');$('app').classList.remove('hide')}catch(e){KEY='';say(e.message,'err')}
+};
+$('ak').addEventListener('keydown',e=>{if(e.key==='Enter')$('go').click()});
+$('nm').addEventListener('input',()=>{$('bid').value=slug($('nm').value)});
+$('create').onclick=async()=>{
+  say('');
+  try{
+    const r=await api('admin.create',{name:$('nm').value.trim(),slug:$('bid').value.trim()});
+    showMessage('Ready to send: '+r.name,[
+      'Welcome to CBSystem Employee Management. Your system is ready.','',
+      'STAFF LOGIN (employees and managers)',
+      'Link: '+staffUrl(r.slug),
+      'Staff key (keep private): '+r.staff_key,'',
+      'BUSINESS LOGIN (owner and HR)',
+      'Link: '+bizUrl(r.slug),
+      'Employee number: OWNER',
+      'Owner PIN: '+r.owner_pin,'',
+      'First steps: sign in to the business login, change your PIN (My PIN), then go to Setup to add a leave year, a policy and a work schedule. Add your people in People and give each their PIN. Run Yearly allocation, then staff can request leave.'
+    ],staffUrl(r.slug));
+    $('nm').value='';$('bid').value='';load();
+  }catch(e){say(e.message,'err')}
+};
+$('copy').onclick=async()=>{try{await navigator.clipboard.writeText($('txt').value);say('Message copied','ok')}catch(e){$('txt').select();say('Select the text and copy it','err')}};
 </script>
-</body>
-</html>
+</body></html>
