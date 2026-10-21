@@ -1,0 +1,2 @@
+[functions.cbs-hol]
+verify_jwt = false
