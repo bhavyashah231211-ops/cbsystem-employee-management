@@ -2,7 +2,7 @@
 <html lang="en-GB"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>CBSystem Employee Management - Admin</title>
+<title>CBS System Employee Management - Admin</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap">
 <script>window.CBS_API='https://yjdmjhxnvsdlevfwuxvh.supabase.co/functions/v1/cbs-hol';</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -35,7 +35,7 @@ td.act{display:flex;gap:6px;flex-wrap:wrap}
 .hide{display:none}
 </style></head>
 <body>
-<h1>CBSystem <span>Employee Management</span></h1>
+<h1>CBS System <span>Employee Management</span></h1>
 <p class="sub">Admin - create and manage businesses</p>
 
 <div class="card" id="login">
@@ -83,8 +83,10 @@ const fmt=d=>d?new Date(d).toLocaleString('en-GB'):'-';
 
 async function api(action,body){
   if(!window.CBS_API)throw new Error('The Supabase function address is missing.');
+  // deleting a business also removes its uploaded documents (done by the cbs-docs function)
+  const url=action==='admin.purge_business'?CBS_API.replace('/cbs-hol','/cbs-docs'):CBS_API;
   let r;
-  try{r=await fetch(CBS_API,{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({action,...body})})}
+  try{r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':KEY},body:JSON.stringify({action,...body})})}
   catch(e){throw new Error('Cannot reach the server. Check your connection and that the cbs-hol function is deployed.')}
   const j=await r.json().catch(()=>({ok:false,error:{message:'Unexpected reply from the server'}}));
   if(!r.ok||j.ok===false){const e=j.error;throw new Error((e&&e.message)||(typeof e==='string'?e:'')||('Error '+r.status))}
@@ -142,9 +144,10 @@ async function load(){
       showMessage('New Owner PIN for '+b.name,['Business login: '+bizUrl(b.slug),'Employee number: OWNER','New Owner PIN: '+r.pin],bizUrl(b.slug));
     });
     mk('Delete',async()=>{
-      const t=prompt('This permanently deletes "'+b.name+'" with all its people, leave and records. It cannot be undone.\n\nType the link name ('+b.slug+') to confirm:');
+      const t=prompt('This permanently deletes "'+b.name+'" with all its people, leave, uploaded documents and records. It cannot be undone.\n\nType the link name ('+b.slug+') to confirm:');
       if(t===null)return;
       if(t.trim().toLowerCase()!==b.slug){say('Link name did not match. Nothing was deleted.','err');return}
+      await api('admin.purge_business',{slug:b.slug});
       await api('admin.delete',{slug:b.slug,confirm:t.trim()});
       $('res').classList.add('hide');
       say(b.name+' deleted','ok');load();
@@ -164,7 +167,7 @@ $('create').onclick=async()=>{
   try{
     const r=await api('admin.create',{name:$('nm').value.trim(),slug:$('bid').value.trim()});
     showMessage('Ready to send: '+r.name,[
-      'Welcome to CBSystem Employee Management. Your system is ready.','',
+      'Welcome to CBS System Employee Management. Your system is ready.','',
       'STAFF LOGIN (employees and managers)',
       'Link: '+staffUrl(r.slug),
       'Staff key (keep private): '+r.staff_key,'',
@@ -172,7 +175,7 @@ $('create').onclick=async()=>{
       'Link: '+bizUrl(r.slug),
       'Employee number: OWNER',
       'Owner PIN: '+r.owner_pin,'',
-      'First steps: sign in to the business login, change your PIN (My PIN), then go to Setup to add a leave year, a policy and a work schedule. Add your people in People and give each their PIN. Run Yearly allocation, then staff can request leave.'
+      'First steps: sign in to the business login, change your PIN (My PIN), then go to Setup to add a leave year, a policy and a work schedule. Add your people in People and give each their PIN. Run Yearly allocation, then staff can request leave. Employees send documents to HR from My documents; HR sees them under Documents.'
     ],staffUrl(r.slug));
     $('nm').value='';$('bid').value='';load();
   }catch(e){say(e.message,'err')}

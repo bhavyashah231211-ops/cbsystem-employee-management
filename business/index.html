@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>CBSystem - Employee Management - Business</title>
+<title>CBS System - Employee Management - Business</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -100,7 +100,7 @@
 
 <!-- Sign-in -->
 <section id="login">
-  <h1>CBSystem <span>Employee Management</span></h1>
+  <h1>CBS System <span>Employee Management</span></h1>
   <p class="muted" style="text-align:center;margin:-8px 0 14px">Business login - owner and HR</p>
   <form class="card" id="loginForm" autocomplete="off">
     <div class="field" id="slugField"><label for="slug">Business link name</label><input id="slug" autocapitalize="none" spellcheck="false"></div>
@@ -115,14 +115,14 @@
 <!-- App shell -->
 <div id="app" class="hidden">
   <div class="top">
-    <h1>CBSystem <span>Employee Management</span></h1>
+    <h1>CBS System <span>Employee Management</span></h1>
     <span class="muted" id="bizName"></span><span class="badge owner">Business</span>
     <div class="who"><b id="whoName"></b><span class="muted" id="whoRole"></span></div>
     <button class="ghost small" id="logoutBtn">Sign out</button>
   </div>
   <nav id="nav"></nav>
   <main id="view"></main>
-  <footer>CBSystem</footer>
+  <footer>CBS System</footer>
 </div>
 
 <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
@@ -142,6 +142,8 @@
 
   // ---- configuration -------------------------------------------------
   var FUNCTION_URL = 'https://yjdmjhxnvsdlevfwuxvh.supabase.co/functions/v1/cbs-hol';
+  // documents use their own function (cbs-docs) next to cbs-hol
+  var DOCS_URL = FUNCTION_URL.replace('/cbs-hol', '/cbs-docs');
 
   var $ = function (id) { return document.getElementById(id); };
   var PORTAL = 'business';
@@ -166,7 +168,7 @@
   function api(action, payload) {
     var headers = { 'Content-Type': 'application/json' };
     if (S.token) headers['x-session'] = S.token;
-    return fetch(FUNCTION_URL, {
+    return fetch(/^docs\./.test(action) ? DOCS_URL : FUNCTION_URL, {
       method: 'POST', headers: headers,
       body: JSON.stringify(Object.assign({ action: action }, payload || {}))
     }).then(function (r) {
@@ -244,7 +246,7 @@
     $('whoName').textContent = S.employee.full_name;
     $('whoRole').textContent = ROLE_LABEL[S.employee.role] || S.employee.role;
 
-    var tabs = [['home', 'Home'], ['setup', 'Setup'], ['people', 'People'], ['balances', 'Balances'], ['approvals', 'Approvals'], ['calendar', 'Calendar'], ['sickness', 'Sickness'], ['reports', 'Reports'], ['audit', 'Audit log'], ['notifications', 'Notifications'], ['account', 'My PIN']];
+    var tabs = [['home', 'Home'], ['setup', 'Setup'], ['people', 'People'], ['documents', 'Documents'], ['balances', 'Balances'], ['approvals', 'Approvals'], ['calendar', 'Calendar'], ['sickness', 'Sickness'], ['reports', 'Reports'], ['audit', 'Audit log'], ['notifications', 'Notifications'], ['account', 'My PIN']];
     var nav = $('nav'); nav.textContent = '';
     tabs.forEach(function (t) {
       var b = el('button', '', t[1]);
@@ -990,8 +992,10 @@
           }
           if (e.status === 'terminated' && !e.anonymised_at) {
             ac.appendChild(btn('Anonymise', 'ghost small', () => {
-              if (!confirm('Anonymise ' + e.full_name + '?\n\nTheir name, email, notes and absence reasons are removed for good. Leave totals are kept for your records. This cannot be undone. Export their data first if you may need it.')) return;
-              api('hr.anonymise_employee', { employee_number: e.employee_number }).then(() => { toast('Anonymised', true); load(); }).catch(fail);
+              if (!confirm('Anonymise ' + e.full_name + '?\n\nTheir name, email, notes and absence reasons are removed for good, and every document they uploaded is deleted for good. Leave totals are kept for your records. This cannot be undone. Export their data and open any documents you need first.')) return;
+              api('docs.purge_employee', { employee_number: e.employee_number })
+                .then(() => api('hr.anonymise_employee', { employee_number: e.employee_number }))
+                .then(() => { toast('Anonymised', true); load(); }).catch(fail);
             }));
             ac.appendChild(document.createTextNode(' '));
           }
@@ -1018,6 +1022,123 @@
       }).catch(fail).then(() => { add.disabled = false; });
     };
     load();
+  };
+
+  // ---- business: employee documents (HR only) -----------------------------
+  const DOC_MAX = 8 * 1024 * 1024;
+  const DOC_EXT = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx', 'txt'];
+  const fmtSize = (n) => { n = Number(n) || 0; return n >= 1048576 ? (Math.round(n / 104857.6) / 10) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; };
+  function fileToBase64(f) {
+    return new Promise((resolve, reject) => {
+      const rd = new FileReader();
+      rd.onload = () => resolve(String(rd.result).split(',')[1] || '');
+      rd.onerror = () => reject(new Error('Could not read that file.'));
+      rd.readAsDataURL(f);
+    });
+  }
+  screens.documents = function (v) {
+    const listCard = card('Employee documents');
+    const addCard = card('Add a document for an employee');
+    const catCard = card('Document categories');
+    v.append(listCard, addCard, catCard);
+    let cats = [];
+
+    // -- the list
+    const fNum = mkInput('text', { placeholder: 'All employees', maxLength: 20 }); fNum.autocapitalize = 'characters';
+    const fCat = el('select');
+    const frow = el('div', 'row'); frow.append(mkField('Employee number', fNum), mkField('Type of document', fCat));
+    const out = el('div');
+    const showBtn = btn('Show', '', loadList);
+    listCard.append(el('p', 'muted', 'Only the owner and HR can open these. Employees cannot see their documents after uploading. Every time a document is opened or removed, it is written to the audit log.'), frow, showBtn, out);
+
+    function openDoc(id) {
+      const w = window.open('', '_blank');
+      api('docs.url', { id: id }).then((r) => {
+        if (w) { w.opener = null; w.location.href = r.url; } else { window.location.href = r.url; }
+      }).catch((e) => { if (w) w.close(); fail(e); });
+    }
+    function loadList() {
+      api('docs.list', { employee_number: fNum.value.trim() || undefined, category_id: fCat.value || undefined }).then((d) => {
+        out.textContent = '';
+        if (!d.documents.length) { out.appendChild(el('p', 'muted', 'No documents found.')); return; }
+        out.appendChild(el('p', 'muted small', d.documents.length + ' document' + (d.documents.length === 1 ? '' : 's') + (d.documents.length >= 300 ? ' (showing the newest 300 - use the filters)' : '')));
+        d.documents.forEach((x) => {
+          const r = el('div', 'rowcard'); const m = el('div', 'grow');
+          m.appendChild(el('div', 'strong', x.employee + ' (' + x.employee_number + ')'));
+          m.appendChild(el('div', 'muted', x.category + ' - ' + x.file_name + ' (' + fmtSize(x.size_bytes) + ')'));
+          m.appendChild(el('div', 'muted small', 'Uploaded ' + new Date(x.uploaded_at).toLocaleString('en-GB') + (x.uploaded_by ? ' by ' + x.uploaded_by : '')));
+          if (x.note) m.appendChild(el('div', 'muted small', 'Note: ' + x.note));
+          r.appendChild(m);
+          r.appendChild(btn('Open', 'small', () => openDoc(x.id)));
+          r.appendChild(btn('Remove', 'danger small', () => {
+            if (!confirm('Remove "' + x.file_name + '" for ' + x.employee + '? It disappears from this list. The removal is recorded in the audit log.')) return;
+            api('docs.remove', { id: x.id }).then(() => { toast('Removed', true); loadList(); }).catch(fail);
+          }));
+          out.appendChild(r);
+        });
+      }).catch(fail);
+    }
+
+    // -- add a document for someone
+    const aNum = mkInput('text', { placeholder: 'e.g. E1001', maxLength: 20 }); aNum.autocapitalize = 'characters';
+    const aCat = el('select');
+    const aFile = mkInput('file', { accept: '.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.txt' });
+    const aNote = mkInput('text', { placeholder: 'Optional note', maxLength: 200 });
+    const arow = el('div', 'row'); arow.append(mkField('Employee number', aNum), mkField('Type of document', aCat), mkField('File (up to 8 MB)', aFile));
+    const aBtn = btn('Upload', '', upload);
+    aBtn.style.marginTop = '12px';
+    addCard.append(el('p', 'muted', 'For example a signed contract or an offer letter you want filed on someone\'s record.'), arow, mkField('Note', aNote), aBtn);
+    function upload() {
+      const f = aFile.files[0];
+      if (!aNum.value.trim()) { toast('Enter the employee number'); return; }
+      if (!aCat.value) { toast('Choose the type of document'); return; }
+      if (!f) { toast('Choose a file first'); return; }
+      const ext = (f.name.split('.').pop() || '').toLowerCase();
+      if (DOC_EXT.indexOf(ext) < 0) { toast('That file type is not allowed. Use PDF, JPG, PNG, Word, Excel or text.'); return; }
+      if (f.size === 0) { toast('That file is empty'); return; }
+      if (f.size > DOC_MAX) { toast('That file is too big. The limit is 8 MB.'); return; }
+      aBtn.disabled = true; aBtn.textContent = 'Uploading...';
+      fileToBase64(f).then((b64) => api('docs.upload', { employee_number: aNum.value.trim(), category_id: aCat.value, file_name: f.name, data_base64: b64, note: aNote.value.trim() || undefined }))
+        .then(() => { toast('Document filed', true); aFile.value = ''; aNote.value = ''; loadList(); })
+        .catch(fail)
+        .then(() => { aBtn.disabled = false; aBtn.textContent = 'Upload'; });
+    }
+
+    // -- categories
+    function fill(sel, firstLabel) {
+      const keep = sel.value; sel.textContent = '';
+      const o0 = el('option', '', firstLabel); o0.value = ''; sel.appendChild(o0);
+      cats.filter((c) => c.active).forEach((c) => { const o = el('option', '', c.name); o.value = c.id; sel.appendChild(o); });
+      if (keep) sel.value = keep;
+    }
+    function drawCats() {
+      catCard.textContent = ''; catCard.appendChild(el('h2', '', 'Document categories'));
+      catCard.appendChild(el('p', 'muted', 'These are the choices employees see when they upload. Untick "Shown" to hide a category without losing documents already filed under it.'));
+      cats.forEach((c) => {
+        const r = el('div', 'rowcard'); const g = el('div', 'grow');
+        const inp = mkInput('text', { value: c.name, maxLength: 60 }); g.appendChild(inp);
+        const cb = mkInput('checkbox'); cb.checked = c.active; cb.style.width = 'auto';
+        const l = el('label'); l.style.cssText = 'text-transform:none;letter-spacing:0;font-size:14px;color:var(--text);display:flex;gap:6px;align-items:center;margin:0';
+        l.append(cb, document.createTextNode('Shown'));
+        r.append(g, l, btn('Save', 'ghost small', () => api('docs.save_category', { id: c.id, name: inp.value, active: cb.checked }).then(() => { toast('Saved', true); loadCats(); }).catch(fail)));
+        catCard.appendChild(r);
+      });
+      const nr = el('div', 'rowcard'); const ng = el('div', 'grow');
+      const nInp = mkInput('text', { placeholder: 'New category, e.g. Driving licence', maxLength: 60 }); ng.appendChild(nInp);
+      nr.append(ng, btn('Add category', 'ghost small', () => {
+        if (!nInp.value.trim()) { toast('Enter a name'); return; }
+        api('docs.save_category', { name: nInp.value }).then(() => { toast('Added', true); loadCats(); }).catch(fail);
+      }));
+      catCard.appendChild(nr);
+    }
+    function loadCats() {
+      return api('docs.categories', { all: true }).then((d) => {
+        cats = d.categories;
+        fill(fCat, 'All types'); fill(aCat, 'Choose...');
+        drawCats();
+      }).catch(fail);
+    }
+    loadCats().then(loadList);
   };
 
   // ---- business: sickness records -----------------------------------------
@@ -1186,7 +1307,7 @@
     v.appendChild(c);
     c.appendChild(el('p', 'muted', 'A permanent record of who did what. Entries cannot be edited or deleted.'));
     const kind = el('select');
-    [['', 'Everything'], ['leave.request.', 'Leave requests and decisions'], ['balance.', 'Balances and allocations'], ['employee.', 'Employees'], ['policy.', 'Policies'], ['schedule.', 'Schedules'], ['session.', 'Sign-ins'], ['business.', 'Account (platform)']]
+    [['', 'Everything'], ['leave.request.', 'Leave requests and decisions'], ['balance.', 'Balances and allocations'], ['employee.', 'Employees'], ['document.', 'Documents'], ['policy.', 'Policies'], ['schedule.', 'Schedules'], ['session.', 'Sign-ins'], ['business.', 'Account (platform)']]
       .forEach((o) => { const op = el('option', '', o[1]); op.value = o[0]; kind.appendChild(op); });
     const who = mkInput('text', { placeholder: 'Employee number', maxLength: 20 });
     const from = mkInput('date'); const to = mkInput('date');

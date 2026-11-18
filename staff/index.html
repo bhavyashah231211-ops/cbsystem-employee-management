@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>CBSystem - Employee Management</title>
+<title>CBS System - Employee Management</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -100,7 +100,7 @@
 
 <!-- Sign-in -->
 <section id="login">
-  <h1>CBSystem <span>Employee Management</span></h1>
+  <h1>CBS System <span>Employee Management</span></h1>
   <p class="muted" style="text-align:center;margin:-8px 0 14px">Staff login</p>
   <form class="card" id="loginForm" autocomplete="off">
     <div class="field" id="slugField"><label for="slug">Business link name</label><input id="slug" autocapitalize="none" spellcheck="false"></div>
@@ -116,14 +116,14 @@
 <!-- App shell -->
 <div id="app" class="hidden">
   <div class="top">
-    <h1>CBSystem <span>Employee Management</span></h1>
+    <h1>CBS System <span>Employee Management</span></h1>
     <span class="muted" id="bizName"></span>
     <div class="who"><b id="whoName"></b><span class="muted" id="whoRole"></span></div>
     <button class="ghost small" id="logoutBtn">Sign out</button>
   </div>
   <nav id="nav"></nav>
   <main id="view"></main>
-  <footer>CBSystem</footer>
+  <footer>CBS System</footer>
 </div>
 
 <div id="toast" class="hidden" role="status"></div>
@@ -134,6 +134,8 @@
 
   // ---- configuration -------------------------------------------------
   var FUNCTION_URL = 'https://yjdmjhxnvsdlevfwuxvh.supabase.co/functions/v1/cbs-hol';
+  // documents use their own function (cbs-docs) next to cbs-hol
+  var DOCS_URL = FUNCTION_URL.replace('/cbs-hol', '/cbs-docs');
 
   var $ = function (id) { return document.getElementById(id); };
   var PORTAL = 'staff';
@@ -158,7 +160,7 @@
   function api(action, payload) {
     var headers = { 'Content-Type': 'application/json' };
     if (S.token) headers['x-session'] = S.token;
-    return fetch(FUNCTION_URL, {
+    return fetch(/^docs\./.test(action) ? DOCS_URL : FUNCTION_URL, {
       method: 'POST', headers: headers,
       body: JSON.stringify(Object.assign({ action: action }, payload || {}))
     }).then(function (r) {
@@ -238,7 +240,7 @@
 
     var tabs = [['home', 'Home'], ['request', 'Request leave'], ['requests', 'My requests'], ['calendar', 'Team calendar']];
     if (S.employee.role === 'manager' || S.employee.role === 'hr') tabs.push(['approvals', 'Approvals']);
-    tabs.push(['notifications', 'Notifications'], ['account', 'My PIN']);
+    tabs.push(['documents', 'My documents'], ['notifications', 'Notifications'], ['account', 'My PIN']);
     var nav = $('nav'); nav.textContent = '';
     tabs.forEach(function (t) {
       var b = el('button', '', t[1]);
@@ -499,6 +501,76 @@
         .catch(fail);
     };
     c.appendChild(f);
+  };
+
+  // ---- staff: my documents (upload only - employees cannot open files again) ----
+  const DOC_MAX = 8 * 1024 * 1024;
+  const DOC_EXT = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx', 'txt'];
+  // true = after sending, the employee sees a simple receipt (type, file name, date). false = nothing at all.
+  const SHOW_RECEIPTS = true;
+  function fileToBase64(f) {
+    return new Promise((resolve, reject) => {
+      const rd = new FileReader();
+      rd.onload = () => resolve(String(rd.result).split(',')[1] || '');
+      rd.onerror = () => reject(new Error('Could not read that file.'));
+      rd.readAsDataURL(f);
+    });
+  }
+  screens.documents = function (v) {
+    const c = card('My documents for HR');
+    v.appendChild(c);
+    c.appendChild(el('p', 'muted', 'Send HR the documents they need, such as ID, right to work, qualifications or a sick note. Once sent, only HR can open them. You will not be able to view, change or delete a document after sending it, so please check it first.'));
+    const cat = el('select');
+    const file = mkInput('file', { accept: '.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.txt' });
+    const note = mkInput('text', { placeholder: 'Optional note for HR', maxLength: 200 });
+    const row = el('div', 'row');
+    row.append(mkField('Type of document', cat), mkField('File (PDF, photo, Word or Excel, up to 8 MB)', file));
+    const sendBtn = btn('Send to HR', '', send);
+    sendBtn.style.marginTop = '12px';
+    c.append(row, mkField('Note', note), sendBtn);
+
+    const rc = card('Sent to HR');
+    const rcList = el('div');
+    rc.appendChild(rcList);
+    if (SHOW_RECEIPTS) v.appendChild(rc);
+
+    api('docs.categories').then((d) => {
+      const first = el('option', '', 'Choose...'); first.value = ''; cat.appendChild(first);
+      d.categories.forEach((x) => { const o = el('option', '', x.name); o.value = x.id; cat.appendChild(o); });
+    }).catch(fail);
+
+    function loadReceipts() {
+      if (!SHOW_RECEIPTS) return;
+      api('docs.my_receipts').then((d) => {
+        rcList.textContent = '';
+        if (!d.receipts.length) { rcList.appendChild(el('p', 'muted', 'Nothing sent yet.')); return; }
+        d.receipts.forEach((r) => {
+          const row2 = el('div', 'rowcard'); const m = el('div', 'grow');
+          m.appendChild(el('div', 'strong', r.category));
+          m.appendChild(el('div', 'muted', r.file_name));
+          row2.appendChild(m);
+          row2.appendChild(el('span', 'muted small', new Date(r.uploaded_at).toLocaleString('en-GB')));
+          rcList.appendChild(row2);
+        });
+      }).catch(fail);
+    }
+
+    function send() {
+      const f = file.files[0];
+      if (!cat.value) { toast('Choose the type of document'); return; }
+      if (!f) { toast('Choose a file first'); return; }
+      const ext = (f.name.split('.').pop() || '').toLowerCase();
+      if (DOC_EXT.indexOf(ext) < 0) { toast('That file type is not allowed. Use PDF, JPG, PNG, Word, Excel or text.'); return; }
+      if (f.size === 0) { toast('That file is empty'); return; }
+      if (f.size > DOC_MAX) { toast('That file is too big. The limit is 8 MB.'); return; }
+      if (!confirm('Send "' + f.name + '" to HR?\n\nYou will not be able to see, change or delete it afterwards.')) return;
+      sendBtn.disabled = true; sendBtn.textContent = 'Sending...';
+      fileToBase64(f).then((b64) => api('docs.upload', { category_id: cat.value, file_name: f.name, data_base64: b64, note: note.value.trim() || undefined }))
+        .then(() => { toast('Sent to HR', true); file.value = ''; note.value = ''; cat.value = ''; loadReceipts(); })
+        .catch(fail)
+        .then(() => { sendBtn.disabled = false; sendBtn.textContent = 'Send to HR'; });
+    }
+    loadReceipts();
   };
 
   // ---- staff: absence (sickness) ------------------------------------------
